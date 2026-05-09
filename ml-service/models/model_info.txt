@@ -1,0 +1,4 @@
+Model trained on: 2026-05-09 20:13:54.357659
+Vectorizer features: 35
+Classifier: MultinomialNB
+Labels: ['low', 'normal', 'urgent']
