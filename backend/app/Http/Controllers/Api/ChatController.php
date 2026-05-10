@@ -28,6 +28,18 @@ class ChatController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
+        // Sembunyikan identitas mahasiswa jika tiket anonim dan user bukan Master Admin
+        $currentUser = $request->user();
+        if ($ticket->is_anonymous && !$currentUser->isMasterAdmin()) {
+            $chats->transform(function ($chat) use ($ticket, $currentUser) {
+                // Mask jika pengirim adalah mahasiswa DAN (user yang melihat adalah orang lain)
+                if ($chat->sender_type === 'mahasiswa' && $chat->sender_id !== $currentUser->id) {
+                    $chat->sender->name = $ticket->anonymous_code;
+                }
+                return $chat;
+            });
+        }
+
         return response()->json([
             'success' => true,
             'data'    => $chats,
@@ -68,6 +80,15 @@ class ChatController extends Controller
 
         // Load relasi sender agar response lengkap
         $chat->load('sender:id,name,role');
+
+        // Sembunyikan identitas jika tiket anonim dan user bukan Master Admin
+        $currentUser = $request->user();
+        if ($ticket->is_anonymous && !$currentUser->isMasterAdmin()) {
+            // Mask jika pengirim adalah mahasiswa DAN (user yang melihat adalah orang lain)
+            if ($chat->sender_type === 'mahasiswa' && $chat->sender_id !== $currentUser->id) {
+                $chat->sender->name = $ticket->anonymous_code;
+            }
+        }
 
         // Broadcast jika Reverb aktif (opsional, dibungkus try-catch)
         try {

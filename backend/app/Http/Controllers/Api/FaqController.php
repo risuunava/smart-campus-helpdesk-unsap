@@ -59,7 +59,7 @@ class FaqController extends Controller
             'title'      => $request->title,
             'content'    => $request->content,
             'category'   => $request->category,
-            'keywords'   => $request->keywords ? json_encode($request->keywords) : null,
+            'keywords'   => $request->keywords ? $request->keywords : null,
             'created_by' => $request->user()->id,
         ]);
 
@@ -115,7 +115,7 @@ class FaqController extends Controller
             'title'     => $request->title,
             'content'   => $request->content,
             'category'  => $request->category,
-            'keywords'  => $request->keywords ? json_encode($request->keywords) : null,
+            'keywords'  => $request->keywords ? $request->keywords : null,
             'is_active' => $request->is_active,
         ], fn($v) => $v !== null));
 

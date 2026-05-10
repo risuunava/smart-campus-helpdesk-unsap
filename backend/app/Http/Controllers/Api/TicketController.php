@@ -250,8 +250,8 @@ class TicketController extends Controller
             ], 403);
         }
         
-        // Sembunyikan identitas anonim untuk admin biasa
-        if ($ticket->is_anonymous && !$user->isMasterAdmin()) {
+        // Sembunyikan identitas anonim untuk admin biasa (Pemilik tiket dan Master Admin tetap bisa melihat)
+        if ($ticket->is_anonymous && !$user->isMasterAdmin() && $ticket->user_id !== $user->id) {
             $ticket->user->name = $ticket->anonymous_code;
             $ticket->user->email = '***';
             $ticket->user->nim = '***';
@@ -642,8 +642,19 @@ class TicketController extends Controller
         $mood = Cache::remember($cacheKey, $cacheDuration, function () use ($period) {
             $months = $period === '12_months' ? 12 : 6;
             
+            $driver = DB::connection()->getDriverName();
+            if ($driver === 'sqlite') {
+                $monthSelect = "strftime('%Y-%m', created_at)";
+            } elseif ($driver === 'pgsql') {
+                $monthSelect = "to_char(created_at, 'YYYY-MM')";
+            } elseif ($driver === 'mysql') {
+                $monthSelect = "DATE_FORMAT(created_at, '%Y-%m')";
+            } else {
+                $monthSelect = "strftime('%Y-%m', created_at)";
+            }
+            
             return Ticket::select(
-                    DB::raw("strftime('%Y-%m', created_at) as month"),
+                    DB::raw("$monthSelect as month"),
                     'priority',
                     DB::raw('count(*) as total')
                 )
