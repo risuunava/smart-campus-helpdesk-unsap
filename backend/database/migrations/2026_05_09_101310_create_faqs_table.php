@@ -21,12 +21,9 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            // Full-text search index untuk PostgreSQL
+            // Index for category search
             $table->index('category');
         });
-
-        // Enable full-text search untuk FAQ
-        DB::statement('CREATE INDEX faqs_title_content_idx ON faqs USING gin(to_tsvector(\'indonesian\', title || \' \' || content))');
     }
 
     public function down(): void

@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'ml' => [
+        'url' => env('ML_SERVICE_URL', 'http://localhost:5000'),
+        'timeout' => env('ML_SERVICE_TIMEOUT', 15),
+        'retry_attempts' => env('ML_SERVICE_RETRY', 2),
+        'enabled' => env('ML_SERVICE_ENABLED', true),
+    ],
+
 ];
