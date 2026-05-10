@@ -833,9 +833,11 @@ class TicketController extends Controller
     private function getDailyTrend(): array
     {
         $days = 14; // 2 minggu terakhir
+        $driver = DB::connection()->getDriverName();
+        $dateSelect = $driver === 'pgsql' ? 'created_at::date' : 'DATE(created_at)';
         
         return Ticket::select(
-                DB::raw('DATE(created_at) as date'),
+                DB::raw("$dateSelect as date"),
                 DB::raw('count(*) as total'),
                 DB::raw("SUM(CASE WHEN priority = 'urgent' THEN 1 ELSE 0 END) as urgent"),
                 DB::raw("SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as resolved")
@@ -853,9 +855,16 @@ class TicketController extends Controller
     private function getWeeklyTrend(): array
     {
         $weeks = 12; // 12 minggu terakhir
+        $driver = DB::connection()->getDriverName();
+        
+        if ($driver === 'pgsql') {
+            $weekSelect = "to_char(created_at, 'IYYY-\"W\"IW')";
+        } else {
+            $weekSelect = "strftime('%Y-W%W', created_at)";
+        }
         
         return Ticket::select(
-                DB::raw("strftime('%Y-W%W', created_at) as week"),
+                DB::raw("$weekSelect as week"),
                 DB::raw('count(*) as total'),
                 DB::raw("SUM(CASE WHEN priority = 'urgent' THEN 1 ELSE 0 END) as urgent"),
                 DB::raw("SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as resolved")
@@ -873,9 +882,16 @@ class TicketController extends Controller
     private function getMonthlyTrend(): array
     {
         $months = 12; // 12 bulan terakhir
+        $driver = DB::connection()->getDriverName();
+        
+        if ($driver === 'pgsql') {
+            $monthSelect = "to_char(created_at, 'YYYY-MM')";
+        } else {
+            $monthSelect = "strftime('%Y-%m', created_at)";
+        }
         
         return Ticket::select(
-                DB::raw("strftime('%Y-%m', created_at) as month"),
+                DB::raw("$monthSelect as month"),
                 DB::raw('count(*) as total'),
                 DB::raw("SUM(CASE WHEN priority = 'urgent' THEN 1 ELSE 0 END) as urgent"),
                 DB::raw("SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as resolved")
