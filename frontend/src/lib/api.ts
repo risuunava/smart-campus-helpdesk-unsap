@@ -1,0 +1,254 @@
+import { 
+  User, 
+  AuthResponse, 
+  LoginCredentials, 
+  CreateTicketForm, 
+  TicketListResponse, 
+  Ticket, 
+  DashboardStats, 
+  TrendData, 
+  FAQ, 
+  FAQSuggestion,
+  CategoryDistribution,
+  CampusMood,
+  Chat
+} from "@/types";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+
+// ============================================
+// API CLIENT CLASS
+// ============================================
+class ApiClient {
+  private token: string | null = null;
+
+  constructor() {
+    // Load token dari localStorage
+    if (typeof window !== "undefined") {
+      this.token = localStorage.getItem("auth_token");
+    }
+  }
+
+  setToken(token: string | null) {
+    this.token = token;
+    if (token) {
+      localStorage.setItem("auth_token", token);
+    } else {
+      localStorage.removeItem("auth_token");
+    }
+  }
+
+  getToken(): string | null {
+    return this.token;
+  }
+
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const url = `${API_URL}${endpoint}`;
+
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      ...options.headers,
+    };
+
+    if (this.token) {
+      (headers as Record<string, string>)["Authorization"] = `Bearer ${this.token}`;
+    }
+
+    // Timeout 30 detik agar tidak hang selamanya di dev server single-threaded
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers,
+        signal: controller.signal,
+      });
+
+      if (response.status === 401) {
+        this.setToken(null);
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        throw new Error("Unauthorized");
+      }
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Request failed");
+      }
+
+      return response.json();
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        throw new Error("Koneksi ke server timeout. Pastikan backend berjalan di http://localhost:8000");
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+
+  // ============================================
+  // AUTH ENDPOINTS
+  // ============================================
+  async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    const response = await this.request<AuthResponse>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    });
+
+    this.setToken(response.data.token);
+    return response;
+  }
+
+  async logout(): Promise<void> {
+    await this.request("/auth/logout", { method: "POST" });
+    this.setToken(null);
+  }
+
+  async getUser(): Promise<User> {
+    const response = await this.request<{ success: boolean; data: User }>("/auth/user");
+    return response.data;
+  }
+
+  // ============================================
+  // TICKET ENDPOINTS
+  // ============================================
+  async getTickets(params?: {
+    page?: number;
+    per_page?: number;
+    status?: string;
+    priority?: string;
+    category?: string;
+    search?: string;
+  }): Promise<TicketListResponse> {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value) searchParams.append(key, value.toString());
+      });
+    }
+
+    const query = searchParams.toString() ? `?${searchParams.toString()}` : "";
+    return this.request<TicketListResponse>(`/tickets${query}`);
+  }
+
+  async getTicket(id: number): Promise<{ success: boolean; data: Ticket }> {
+    return this.request(`/tickets/${id}`);
+  }
+
+  async createTicket(formData: FormData): Promise<{ success: boolean; data: Ticket; message: string }> {
+    const headers: HeadersInit = {};
+    // Jangan set Content-Type, biarkan browser set multipart/form-data
+    if (this.token) {
+      (headers as Record<string, string>)["Authorization"] = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(`${API_URL}/tickets`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        ...headers,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Failed to create ticket");
+    }
+
+    return response.json();
+  }
+
+  async updateTicket(id: number, data: Partial<Ticket>): Promise<{ success: boolean; data: Ticket }> {
+    return this.request(`/tickets/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async correctMLLabel(
+    ticketId: number,
+    correctPriority: string,
+    correctionNote?: string
+  ): Promise<{ success: boolean; message: string }> {
+    return this.request(`/tickets/${ticketId}/correct-ml`, {
+      method: "POST",
+      body: JSON.stringify({
+        correct_priority: correctPriority,
+        correction_note: correctionNote,
+      }),
+    });
+  }
+
+  // ============================================
+  // FAQ ENDPOINTS
+  // ============================================
+  async getFAQSuggestions(query: string): Promise<{ success: boolean; data: FAQSuggestion[] }> {
+    return this.request("/tickets/faq-suggestion", {
+      method: "POST",
+      body: JSON.stringify({ query }),
+    });
+  }
+
+  // ============================================
+  // DASHBOARD ENDPOINTS
+  // ============================================
+  async getDashboardStats(): Promise<{ success: boolean; data: DashboardStats }> {
+    return this.request("/dashboard/stats");
+  }
+
+  async getDashboardTrend(period: string = "monthly"): Promise<{ success: boolean; data: TrendData[] }> {
+    return this.request(`/dashboard/trend?period=${period}`);
+  }
+
+  async getCategoryDistribution(): Promise<{ success: boolean; data: CategoryDistribution[] }> {
+    return this.request("/dashboard/category-distribution");
+  }
+
+  async getCampusMood(period: string = "6_months"): Promise<{ success: boolean; data: CampusMood[] }> {
+    return this.request(`/dashboard/campus-mood?period=${period}`);
+  }
+
+  // ============================================
+  // CHAT ENDPOINTS
+  // ============================================
+  async getChats(ticketId: number): Promise<{ success: boolean; data: Chat[] }> {
+    return this.request(`/tickets/${ticketId}/chats`);
+  }
+
+  async sendMessage(ticketId: number, message: string): Promise<{ success: boolean; data: Chat }> {
+    return this.request(`/tickets/${ticketId}/chats`, {
+      method: "POST",
+      body: JSON.stringify({ message }),
+    });
+  }
+
+  // ============================================
+  // EXPORT ENDPOINTS
+  // ============================================
+  async exportTickets(params?: {
+    format?: string;
+    date_from?: string;
+    date_to?: string;
+  }): Promise<{ success: boolean; data: { filename: string; url: string; total_records: number }; message: string }> {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value) searchParams.append(key, value);
+      });
+    }
+    const query = searchParams.toString() ? `?${searchParams.toString()}` : "";
+    return this.request(`/tickets/export${query}`);
+  }
+}
+
+// Singleton instance
+export const api = new ApiClient();

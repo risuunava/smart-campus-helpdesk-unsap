@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, RefreshCw, Zap } from "lucide-react";
 
 export default function CheckConnectionPage() {
@@ -44,66 +42,67 @@ export default function CheckConnectionPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl border-t-4 border-t-emerald-500">
-        <CardHeader className="text-center">
+    <div className="min-h-screen bg-[#121212] flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-[#181818] border border-[#282828] border-t-4 border-t-[#1ed760] rounded-xl shadow-2xl p-6">
+        <div className="text-center mb-6">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-emerald-100 rounded-full">
-              <Zap className="h-8 w-8 text-emerald-600" />
+            <div className="p-3 bg-[#1ed760]/10 rounded-full">
+              <Zap className="h-8 w-8 text-[#1ed760]" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-slate-800">Connection Checker</CardTitle>
-          <CardDescription>
+          <h1 className="text-2xl font-bold text-white">Connection Checker</h1>
+          <p className="text-[#b3b3b3] mt-2 text-sm">
             Memeriksa koneksi antara Frontend (Next.js) dan Backend (Laravel)
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex flex-col items-center justify-center py-4 space-y-4">
+          </p>
+        </div>
+        
+        <div className="space-y-6">
+          <div className="flex flex-col items-center justify-center py-4 min-h-[160px]">
             {status === 'loading' && (
-              <div className="flex flex-col items-center space-y-2">
-                <RefreshCw className="h-10 w-10 text-brand-500 animate-spin" />
-                <p className="text-sm font-medium text-slate-600">Menghubungi backend...</p>
+              <div className="flex flex-col items-center space-y-3">
+                <RefreshCw className="h-10 w-10 text-[#1ed760] animate-spin" />
+                <p className="text-sm font-medium text-[#b3b3b3]">Menghubungi backend...</p>
               </div>
             )}
 
             {status === 'success' && (
               <div className="flex flex-col items-center space-y-3 w-full animate-in">
-                <CheckCircle2 className="h-12 w-12 text-emerald-500" />
-                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 py-1 px-3">
+                <CheckCircle2 className="h-12 w-12 text-[#1ed760]" />
+                <span className="bg-[#1ed760]/10 text-[#1ed760] border border-[#1ed760]/20 py-1 px-3 rounded-full text-xs font-semibold tracking-wider">
                   TERKONEKSI
-                </Badge>
-                <div className="bg-slate-100 p-4 rounded-lg w-full text-xs font-mono text-slate-700 overflow-auto max-h-40">
+                </span>
+                <div className="bg-[#1f1f1f] border border-[#282828] p-4 rounded-lg w-full text-xs font-mono text-[#b3b3b3] overflow-auto max-h-40">
                   <pre>{JSON.stringify(backendData, null, 2)}</pre>
                 </div>
-                <p className="text-xs text-slate-500">API URL: {apiUrl}</p>
+                <p className="text-xs text-[#666666]">API URL: {apiUrl}</p>
               </div>
             )}
 
             {status === 'error' && (
               <div className="flex flex-col items-center space-y-3 w-full animate-in">
-                <XCircle className="h-12 w-12 text-red-500" />
-                <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 py-1 px-3">
+                <XCircle className="h-12 w-12 text-[#f3727f]" />
+                <span className="bg-[#f3727f]/10 text-[#f3727f] border border-[#f3727f]/20 py-1 px-3 rounded-full text-xs font-semibold tracking-wider">
                   TERPUTUS
-                </Badge>
-                <div className="bg-red-50 p-4 rounded-lg w-full border border-red-100">
-                  <p className="text-xs text-red-600 font-medium">{error}</p>
-                  <p className="text-[10px] text-red-500 mt-2">
-                    Pastikan backend berjalan di <code className="bg-red-100 px-1 rounded">{apiUrl.replace('/api', '')}</code>
+                </span>
+                <div className="bg-[#f3727f]/5 p-4 rounded-lg w-full border border-[#f3727f]/20">
+                  <p className="text-xs text-[#f3727f] font-medium">{error}</p>
+                  <p className="text-[10px] text-[#f3727f]/70 mt-2">
+                    Pastikan backend berjalan di <code className="bg-[#f3727f]/10 px-1 rounded">{apiUrl.replace('/api', '')}</code>
                   </p>
                 </div>
               </div>
             )}
           </div>
 
-          <Button 
+          <button 
             onClick={checkConnection} 
             disabled={status === 'loading'}
-            className="w-full btn-gradient"
+            className="w-full btn-gradient py-3 text-sm flex items-center justify-center disabled:opacity-50"
           >
             {status === 'loading' ? 'Memeriksa...' : 'Cek Ulang Koneksi'}
-          </Button>
-        </CardContent>
-      </Card>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

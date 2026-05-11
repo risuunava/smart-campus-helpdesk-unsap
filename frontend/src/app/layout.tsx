@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -17,8 +17,9 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "Smart Campus Helpdesk - UNSAP",
-  description: "Sistem pelaporan keluhan mahasiswa Universitas Sebelas April dengan kecerdasan buatan",
-  keywords: "UNSAP, helpdesk, pelaporan, mahasiswa, kampus",
+  description:
+    "Sistem pelaporan keluhan mahasiswa Universitas Sebelas April dengan kecerdasan buatan",
+  keywords: "UNSAP, helpdesk, pelaporan, mahasiswa, kampus, AI",
   authors: [{ name: "UNSAP IT Team" }],
   openGraph: {
     title: "Smart Campus Helpdesk - UNSAP",
@@ -35,7 +36,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>
-      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans`}>
+      <body
+        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
+      >
         {children}
         <Toaster />
       </body>

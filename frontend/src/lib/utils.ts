@@ -79,22 +79,22 @@ export function truncateText(text: string, maxLength: number): string {
 export function getPriorityColor(priority: "low" | "normal" | "urgent") {
   const colors = {
     urgent: {
-      bg: "bg-red-100",
-      text: "text-red-700",
-      border: "border-red-200",
-      icon: "🔴",
+      bg: "bg-red-500/15",
+      text: "text-[#f3727f]",
+      border: "border-red-500/25",
+      icon: "•",
     },
     normal: {
-      bg: "bg-amber-100",
-      text: "text-amber-700",
-      border: "border-amber-200",
-      icon: "🟡",
+      bg: "bg-amber-500/15",
+      text: "text-[#ffa42b]",
+      border: "border-amber-500/25",
+      icon: "•",
     },
     low: {
-      bg: "bg-slate-100",
-      text: "text-slate-700",
-      border: "border-slate-200",
-      icon: "⚪",
+      bg: "bg-[#b3b3b3]/10",
+      text: "text-[#b3b3b3]",
+      border: "border-[#b3b3b3]/20",
+      icon: "•",
     },
   };
 
@@ -107,27 +107,27 @@ export function getPriorityColor(priority: "low" | "normal" | "urgent") {
 export function getStatusColor(status: "open" | "in_progress" | "resolved" | "closed") {
   const colors = {
     open: {
-      bg: "bg-blue-100",
-      text: "text-blue-700",
-      border: "border-blue-200",
+      bg: "bg-[#539df5]/15",
+      text: "text-[#539df5]",
+      border: "border-[#539df5]/25",
       label: "Terbuka",
     },
     in_progress: {
-      bg: "bg-purple-100",
-      text: "text-purple-700",
-      border: "border-purple-200",
+      bg: "bg-purple-500/15",
+      text: "text-purple-400",
+      border: "border-purple-500/25",
       label: "Diproses",
     },
     resolved: {
-      bg: "bg-green-100",
-      text: "text-green-700",
-      border: "border-green-200",
+      bg: "bg-[#1ed760]/15",
+      text: "text-[#1ed760]",
+      border: "border-[#1ed760]/25",
       label: "Selesai",
     },
     closed: {
-      bg: "bg-gray-100",
-      text: "text-gray-700",
-      border: "border-gray-200",
+      bg: "bg-[#4d4d4d]/30",
+      text: "text-[#b3b3b3]",
+      border: "border-[#4d4d4d]/40",
       label: "Ditutup",
     },
   };

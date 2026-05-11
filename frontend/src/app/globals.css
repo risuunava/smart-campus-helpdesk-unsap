@@ -2,48 +2,49 @@
 @config "../../tailwind.config.ts";
 
 /* ============================================
-   SMART CAMPUS HELPDESK UNSAP - GLOBAL STYLES
+   SMART CAMPUS HELPDESK UNSAP - DARK THEME
+   Inspired by Spotify Design System
    ============================================ */
 
 @layer base {
   :root {
-    /* Background & Foreground */
-    --background: 210 40% 98%;
-    --foreground: 222.2 84% 4.9%;
+    /* Background & Foreground — Near-black immersive */
+    --background: 0 0% 7.1%;       /* #121212 */
+    --foreground: 0 0% 100%;       /* #ffffff */
 
-    /* Card & Popover */
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Card & Popover — Dark surface */
+    --card: 0 0% 9.4%;             /* #181818 */
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 9.4%;
+    --popover-foreground: 0 0% 100%;
 
-    /* Primary - Emerald Green */
-    --primary: 160 84% 39%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary — Spotify Green */
+    --primary: 141 76% 48%;        /* #1ed760 */
+    --primary-foreground: 0 0% 0%; /* black text on green */
 
-    /* Secondary - Slate */
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary — Mid dark surface */
+    --secondary: 0 0% 12.2%;       /* #1f1f1f */
+    --secondary-foreground: 0 0% 100%;
 
-    /* Muted */
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted — Subdued elements */
+    --muted: 0 0% 14.5%;           /* #252525 */
+    --muted-foreground: 0 0% 70%;  /* #b3b3b3 */
 
-    /* Accent - Yellow Gradient */
-    --accent: 48 96% 53%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent — Green accent */
+    --accent: 141 76% 48%;
+    --accent-foreground: 0 0% 0%;
 
-    /* Destructive */
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive — Negative red */
+    --destructive: 355 82% 70%;    /* #f3727f */
+    --destructive-foreground: 0 0% 100%;
 
     /* Borders & Inputs */
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 160 84% 39%;
+    --border: 0 0% 20%;            /* #333333 */
+    --input: 0 0% 15%;             /* #262626 */
+    --ring: 141 76% 48%;           /* spotify green ring */
 
     /* Border Radius */
-    --radius: 0.75rem;
+    --radius: 0.5rem;
   }
 }
 
@@ -51,149 +52,189 @@
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Custom scrollbar */
+  /* Custom scrollbar — dark */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-slate-100;
+    background: #121212;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+    background: #4d4d4d;
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #666666;
   }
 }
 
 /* ============================================
-   CUSTOM UTILITY CLASSES
+   CUSTOM UTILITY CLASSES — Dark Spotify Theme
    ============================================ */
 @layer components {
-  /* Card Styles */
+  /* Card Styles — Dark surfaces */
   .card-clean {
-    @apply bg-white shadow-sm border border-slate-200 rounded-lg;
+    @apply bg-[#181818] border border-[#282828] rounded-lg;
   }
 
   .card-hover {
-    @apply bg-white shadow-sm border border-slate-200 rounded-lg transition-all duration-200 hover:shadow-card-hover hover:border-brand-200;
+    @apply bg-[#181818] border border-[#282828] rounded-lg transition-all duration-200
+           hover:bg-[#252525] hover:border-[#3a3a3a];
   }
 
-  /* Gradient Button */
+  /* Gradient Button — Spotify Green pill */
   .btn-gradient {
-    @apply bg-gradient-to-r from-emerald-600 to-yellow-400 
-           text-white font-semibold 
-           hover:from-emerald-700 hover:to-yellow-500 
-           active:from-emerald-800 active:to-yellow-600
-           transition-all duration-200 
-           shadow-sm hover:shadow-md
-           disabled:opacity-50 disabled:cursor-not-allowed;
+    background: #1ed760;
+    color: #000000;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    border-radius: 9999px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(30, 215, 96, 0.25);
+  }
+  .btn-gradient:hover {
+    background: #1fdf64;
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(30, 215, 96, 0.35);
+  }
+  .btn-gradient:active {
+    background: #1bcc59;
+    transform: scale(0.98);
+  }
+  .btn-gradient:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
   }
 
   .btn-gradient-outline {
-    @apply border-2 border-transparent bg-gradient-to-r from-emerald-600 to-yellow-400 
-           bg-clip-padding
-           text-transparent bg-clip-text
-           hover:from-emerald-700 hover:to-yellow-500
-           transition-all duration-200;
+    @apply border border-[#7c7c7c] text-white bg-transparent rounded-full
+           hover:border-white hover:text-white transition-all duration-200;
   }
 
-  /* Priority Badges */
+  /* Priority Badges — Dark-friendly */
   .badge-urgent {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold
-           bg-red-100 text-red-700 border border-red-200;
+           bg-red-500/15 text-[#f3727f] border border-red-500/25;
   }
 
   .badge-normal {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold
-           bg-amber-100 text-amber-700 border border-amber-200;
+           bg-amber-500/15 text-[#ffa42b] border border-amber-500/25;
   }
 
   .badge-low {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold
-           bg-slate-100 text-slate-700 border border-slate-200;
+           bg-[#b3b3b3]/10 text-[#b3b3b3] border border-[#b3b3b3]/20;
   }
 
-  /* Status Badges */
+  /* Status Badges — Dark-friendly */
   .badge-open {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold
-           bg-blue-100 text-blue-700 border border-blue-200;
+           bg-[#539df5]/15 text-[#539df5] border border-[#539df5]/25;
   }
 
   .badge-in-progress {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold
-           bg-purple-100 text-purple-700 border border-purple-200;
+           bg-purple-500/15 text-purple-400 border border-purple-500/25;
   }
 
   .badge-resolved {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold
-           bg-green-100 text-green-700 border border-green-200;
+           bg-[#1ed760]/15 text-[#1ed760] border border-[#1ed760]/25;
   }
 
   .badge-closed {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold
-           bg-gray-100 text-gray-700 border border-gray-200;
+           bg-[#4d4d4d]/30 text-[#b3b3b3] border border-[#4d4d4d]/40;
   }
 
-  /* Hero Banner Gradient */
+  /* Hero Banner — Dark gradient with green glow */
   .hero-gradient {
-    @apply bg-gradient-to-r from-emerald-600 via-emerald-500 to-yellow-400;
+    background: linear-gradient(135deg, #121212 0%, #1a3a2a 50%, #121212 100%);
   }
 
   .hero-gradient-text {
-    @apply bg-gradient-to-r from-emerald-600 to-yellow-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-[#1ed760] to-[#1fdf64] bg-clip-text text-transparent;
   }
 
-  /* Input Focus Styles */
+  /* Input Focus Styles — Dark inputs */
   .input-focus {
-    @apply focus:ring-2 focus:ring-brand-500 focus:border-brand-500 
-           border-slate-300 rounded-md transition-all duration-200;
+    @apply bg-[#1f1f1f] border-[#4d4d4d] text-white placeholder:text-[#b3b3b3]/60
+           rounded-lg transition-all duration-200
+           focus:ring-2 focus:ring-[#1ed760]/40 focus:border-[#1ed760];
   }
 
-  /* Skeleton Loading */
+  /* Skeleton Loading — Dark */
   .skeleton-pulse {
-    @apply animate-pulse bg-slate-200 rounded;
+    @apply animate-pulse bg-[#282828] rounded;
   }
 
-  /* Table Styles */
+  /* Table Styles — Dark */
   .table-header {
-    @apply bg-slate-50 text-slate-700 font-semibold text-sm;
+    @apply bg-[#1f1f1f] text-[#b3b3b3] font-semibold text-sm;
   }
 
   .table-row-hover {
-    @apply hover:bg-slate-50 transition-colors duration-150;
+    @apply hover:bg-[#252525] transition-colors duration-150;
   }
 
-  /* Sidebar Active */
+  /* Sidebar Active — Green accent bar */
   .sidebar-active {
-    @apply bg-brand-50 text-brand-700 border-r-4 border-brand-600 font-medium;
+    @apply bg-[#1ed760]/10 text-[#1ed760] border-r-[3px] border-[#1ed760] font-semibold;
   }
 
   .sidebar-inactive {
-    @apply text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors duration-150;
+    @apply text-[#b3b3b3] hover:bg-[#1f1f1f] hover:text-white transition-colors duration-150;
   }
 
-  /* Toast Notifications */
+  /* Custom Scrollbar Utility */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #282828;
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #333333;
+  }
+
+  /* Toast Notifications — Dark toasts */
   .toast-success {
-    @apply bg-green-50 border border-green-200 text-green-800 rounded-lg shadow-lg;
+    @apply bg-[#1ed760]/10 border border-[#1ed760]/25 text-[#1ed760] rounded-lg;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   }
 
   .toast-error {
-    @apply bg-red-50 border border-red-200 text-red-800 rounded-lg shadow-lg;
+    @apply bg-red-500/10 border border-red-500/25 text-[#f3727f] rounded-lg;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   }
 
   .toast-warning {
-    @apply bg-amber-50 border border-amber-200 text-amber-800 rounded-lg shadow-lg;
+    @apply bg-amber-500/10 border border-amber-500/25 text-[#ffa42b] rounded-lg;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   }
 
   .toast-info {
-    @apply bg-blue-50 border border-blue-200 text-blue-800 rounded-lg shadow-lg;
+    @apply bg-[#539df5]/10 border border-[#539df5]/25 text-[#539df5] rounded-lg;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   }
 }
 
@@ -217,34 +258,26 @@
   }
 
   @keyframes slideInRight {
-    from {
-      transform: translateX(100%);
-    }
-    to {
-      transform: translateX(0);
-    }
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
   }
 
   @keyframes slideInLeft {
-    from {
-      transform: translateX(-100%);
-    }
-    to {
-      transform: translateX(0);
-    }
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
   }
 
-  @keyframes pulse-glow {
+  @keyframes pulseGlow {
     0%, 100% {
-      box-shadow: 0 0 5px rgba(5, 150, 105, 0.2);
+      box-shadow: 0 0 5px rgba(30, 215, 96, 0.2);
     }
     50% {
-      box-shadow: 0 0 20px rgba(5, 150, 105, 0.4);
+      box-shadow: 0 0 25px rgba(30, 215, 96, 0.4);
     }
   }
 
   .pulse-glow {
-    animation: pulse-glow 2s infinite;
+    animation: pulseGlow 2s infinite;
   }
 }
 
@@ -252,24 +285,21 @@
    RESPONSIVE UTILITIES
    ============================================ */
 @layer utilities {
-  /* Mobile-first container */
   .container-mobile {
     @apply px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl;
   }
 
-  /* Desktop data-dense layout */
   .data-dense {
     @apply text-sm leading-5;
   }
 
-  /* Spacious layout untuk mobile */
   .spacious-mobile {
     @apply text-base leading-7;
   }
 }
 
 /* ============================================
-   PRINT STYLES (Untuk Export Report)
+   PRINT STYLES
    ============================================ */
 @media print {
   .no-print {
