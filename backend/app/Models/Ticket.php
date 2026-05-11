@@ -40,6 +40,18 @@ class Ticket extends Model
         'ml_metadata' => 'json',
     ];
 
+    protected $appends = [
+        'attachment_url',
+    ];
+
+    public function getAttachmentUrlAttribute(): ?string
+    {
+        if ($this->attachment_path) {
+            return asset('storage/' . $this->attachment_path);
+        }
+        return null;
+    }
+
     // Relationship: User yang membuat tiket
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

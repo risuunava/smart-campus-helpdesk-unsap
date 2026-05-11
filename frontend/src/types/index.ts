@@ -45,6 +45,7 @@ export interface Ticket {
   is_anonymous: boolean;
   anonymous_code?: string;
   attachment_path?: string;
+  attachment_url?: string;
   attachment_type?: string;
   user: User;
   assigned_to?: number;

@@ -240,7 +240,15 @@ export default function TicketDetailAdminPage() {
             {ticket.attachment_path && (
               <div>
                 <h3 className="text-xs font-semibold text-[#b3b3b3] mb-2 uppercase tracking-wider">LAMPIRAN</h3>
-                <Button variant="outline" size="sm" className="border-[#4d4d4d] text-[#b3b3b3] hover:text-white hover:border-white">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="border-[#4d4d4d] text-[#b3b3b3] hover:text-white hover:border-white"
+                  onClick={() => {
+                    const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000';
+                    window.open(ticket.attachment_url || `${baseUrl}/storage/${ticket.attachment_path}`, '_blank');
+                  }}
+                >
                   <Paperclip className="h-4 w-4 mr-2" />
                   Lihat Lampiran
                 </Button>

@@ -155,7 +155,15 @@ export default function TicketDetailMahasiswaPage() {
                       </p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" className="border-[#4d4d4d] text-[#b3b3b3] hover:text-white hover:border-white">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="border-[#4d4d4d] text-[#b3b3b3] hover:text-white hover:border-white"
+                    onClick={() => {
+                      const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000';
+                      window.open(ticket.attachment_url || `${baseUrl}/storage/${ticket.attachment_path}`, '_blank');
+                    }}
+                  >
                     <Download className="mr-2 h-4 w-4" />
                     Unduh
                   </Button>
