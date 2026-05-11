@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { getPriorityColor, getStatusColor, formatDate, timeAgo } from "@/lib/utils";
 import { 
   ArrowLeft, 
@@ -23,7 +24,8 @@ import {
   AlertCircle,
   Loader2,
   MessageSquare,
-  Paperclip
+  Paperclip,
+  Download
 } from "lucide-react";
 
 export default function TicketDetailAdminPage() {
@@ -35,6 +37,7 @@ export default function TicketDetailAdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [isAttachmentOpen, setIsAttachmentOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -243,14 +246,14 @@ export default function TicketDetailAdminPage() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="border-[#4d4d4d] text-[#b3b3b3] hover:text-white hover:border-white"
-                  onClick={() => {
-                    const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000';
-                    window.open(ticket.attachment_url || `${baseUrl}/storage/${ticket.attachment_path}`, '_blank');
-                  }}
+                  className="border-[#4d4d4d] text-[#b3b3b3] hover:text-white hover:border-white w-full flex justify-between group"
+                  onClick={() => setIsAttachmentOpen(true)}
                 >
-                  <Paperclip className="h-4 w-4 mr-2" />
-                  Lihat Lampiran
+                  <div className="flex items-center">
+                    <Paperclip className="h-4 w-4 mr-2 text-[#666666] group-hover:text-white" />
+                    <span className="truncate max-w-[150px]">{ticket.attachment_path.split('/').pop()}</span>
+                  </div>
+                  <span className="text-xs text-[#666666] group-hover:text-white">{ticket.attachment_type?.toUpperCase()}</span>
                 </Button>
               </div>
             )}
@@ -375,6 +378,44 @@ export default function TicketDetailAdminPage() {
           </div>
         </div>
       </div>
+
+      {/* Attachment Modal */}
+      <Dialog open={isAttachmentOpen} onOpenChange={setIsAttachmentOpen}>
+        <DialogContent className="bg-[#181818] border-[#282828] text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+          <DialogHeader className="p-6 pb-2 border-b border-[#282828]">
+            <DialogTitle className="text-xl">Bukti Laporan</DialogTitle>
+            <DialogDescription className="text-[#b3b3b3]">
+              {ticket.title}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto p-6 flex flex-col items-center justify-center bg-[#121212] min-h-[400px]">
+            {ticket?.attachment_type?.match(/^(jpg|jpeg|png|gif)$/i) ? (
+              <img 
+                src={ticket.attachment_url || `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}/storage/${ticket.attachment_path}`} 
+                alt="Lampiran Tiket" 
+                className="max-w-full max-h-[60vh] object-contain rounded-md"
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center space-y-4 text-[#666666]">
+                <Paperclip className="h-16 w-16" />
+                <p>Preview tidak tersedia untuk format file ini ({ticket?.attachment_type?.toUpperCase()})</p>
+              </div>
+            )}
+          </div>
+          <div className="p-4 border-t border-[#282828] flex justify-end bg-[#181818]">
+            <Button 
+              className="btn-gradient"
+              onClick={() => {
+                const url = ticket?.attachment_url || `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}/storage/${ticket?.attachment_path}`;
+                window.open(url, '_blank');
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Unduh File
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

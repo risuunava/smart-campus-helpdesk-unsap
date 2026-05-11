@@ -174,6 +174,38 @@ class ApiClient {
     });
   }
 
+  async updateAttachment(id: number, file: File): Promise<{ success: boolean; data: Ticket; message: string }> {
+    const formData = new FormData();
+    formData.append("attachment", file);
+    
+    const headers: HeadersInit = {};
+    if (this.token) {
+      (headers as Record<string, string>)["Authorization"] = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(`${API_URL}/tickets/${id}/attachment`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        ...headers,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Failed to update attachment");
+    }
+
+    return response.json();
+  }
+
+  async deleteAttachment(id: number): Promise<{ success: boolean; data: Ticket; message: string }> {
+    return this.request(`/tickets/${id}/attachment`, {
+      method: "DELETE",
+    });
+  }
+
   async correctMLLabel(
     ticketId: number,
     correctPriority: string,

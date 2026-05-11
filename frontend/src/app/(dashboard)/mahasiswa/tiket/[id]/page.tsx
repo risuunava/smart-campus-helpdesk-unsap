@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { getPriorityColor, getStatusColor, formatDate, timeAgo } from "@/lib/utils";
 import { 
   ArrowLeft, 
@@ -21,7 +23,10 @@ import {
   Loader2,
   MessageSquare,
   Paperclip,
-  Download
+  Download,
+  Trash2,
+  Upload,
+  Edit2
 } from "lucide-react";
 
 export default function TicketDetailMahasiswaPage() {
@@ -32,6 +37,9 @@ export default function TicketDetailMahasiswaPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [isAttachmentOpen, setIsAttachmentOpen] = useState(false);
+  const [isUpdatingAttachment, setIsUpdatingAttachment] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -77,6 +85,46 @@ export default function TicketDetailMahasiswaPage() {
       console.error("Failed to send message:", error);
     } finally {
       setIsSending(false);
+    }
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !id) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Ukuran file maksimal 2MB");
+      return;
+    }
+
+    setIsUpdatingAttachment(true);
+    try {
+      const response = await api.updateAttachment(Number(id), file);
+      setTicket(response.data);
+      toast.success("Lampiran berhasil diperbarui");
+    } catch (error: any) {
+      toast.error(error.message || "Gagal memperbarui lampiran");
+    } finally {
+      setIsUpdatingAttachment(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  }
+
+  async function handleDeleteAttachment() {
+    if (!id || !confirm("Apakah Anda yakin ingin menghapus lampiran ini?")) return;
+
+    setIsUpdatingAttachment(true);
+    try {
+      const response = await api.deleteAttachment(Number(id));
+      setTicket(response.data);
+      setIsAttachmentOpen(false);
+      toast.success("Lampiran berhasil dihapus");
+    } catch (error: any) {
+      toast.error(error.message || "Gagal menghapus lampiran");
+    } finally {
+      setIsUpdatingAttachment(false);
     }
   }
 
@@ -149,7 +197,7 @@ export default function TicketDetailMahasiswaPage() {
                   <div className="flex items-center gap-3">
                     <Paperclip className="h-5 w-5 text-[#666666]" />
                     <div>
-                      <p className="text-sm font-medium text-white">Lampiran</p>
+                      <p className="text-sm font-medium text-white truncate max-w-[200px]">{ticket.attachment_path.split('/').pop()}</p>
                       <p className="text-xs text-[#666666]">
                         {ticket.attachment_type?.toUpperCase()} File
                       </p>
@@ -159,13 +207,9 @@ export default function TicketDetailMahasiswaPage() {
                     variant="outline" 
                     size="sm" 
                     className="border-[#4d4d4d] text-[#b3b3b3] hover:text-white hover:border-white"
-                    onClick={() => {
-                      const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000';
-                      window.open(ticket.attachment_url || `${baseUrl}/storage/${ticket.attachment_path}`, '_blank');
-                    }}
+                    onClick={() => setIsAttachmentOpen(true)}
                   >
-                    <Download className="mr-2 h-4 w-4" />
-                    Unduh
+                    Lihat Lampiran
                   </Button>
                 </div>
               )}
@@ -434,6 +478,79 @@ export default function TicketDetailMahasiswaPage() {
           </div>
         </div>
       </div>
+
+      {/* Attachment Modal */}
+      <Dialog open={isAttachmentOpen} onOpenChange={setIsAttachmentOpen}>
+        <DialogContent className="bg-[#181818] border-[#282828] text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+          <DialogHeader className="p-6 pb-2 border-b border-[#282828]">
+            <DialogTitle className="text-xl">Bukti Laporan</DialogTitle>
+            <DialogDescription className="text-[#b3b3b3]">
+              {ticket.title}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto p-6 flex flex-col items-center justify-center bg-[#121212] min-h-[400px]">
+            {ticket?.attachment_type?.match(/^(jpg|jpeg|png|gif)$/i) ? (
+              <img 
+                src={ticket.attachment_url || `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}/storage/${ticket.attachment_path}`} 
+                alt="Lampiran Tiket" 
+                className="max-w-full max-h-[60vh] object-contain rounded-md"
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center space-y-4 text-[#666666]">
+                <Paperclip className="h-16 w-16" />
+                <p>Preview tidak tersedia untuk format file ini ({ticket?.attachment_type?.toUpperCase()})</p>
+              </div>
+            )}
+          </div>
+          <div className="p-4 border-t border-[#282828] flex justify-between bg-[#181818] items-center">
+            {ticket.status !== 'closed' ? (
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept=".jpg,.jpeg,.png,.pdf"
+                  onChange={handleFileChange}
+                />
+                <Button 
+                  variant="outline"
+                  className="border-[#4d4d4d] text-white hover:bg-[#282828]"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUpdatingAttachment}
+                >
+                  {isUpdatingAttachment ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Edit2 className="h-4 w-4 mr-2" />
+                  )}
+                  Ubah Foto
+                </Button>
+                <Button 
+                  variant="destructive"
+                  className="bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20"
+                  onClick={handleDeleteAttachment}
+                  disabled={isUpdatingAttachment}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Hapus Foto
+                </Button>
+              </div>
+            ) : (
+              <div className="text-sm text-[#666666] italic">Tiket telah ditutup, tidak dapat mengubah lampiran.</div>
+            )}
+            <Button 
+              className="btn-gradient"
+              onClick={() => {
+                const url = ticket?.attachment_url || `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}/storage/${ticket?.attachment_path}`;
+                window.open(url, '_blank');
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Unduh File
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
