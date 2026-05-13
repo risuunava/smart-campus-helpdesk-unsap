@@ -15,7 +15,8 @@ import {
   Shield,
   Crown,
   Menu,
-  X
+  X,
+  Settings
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
@@ -62,6 +63,12 @@ export function Sidebar() {
         href: "/mahasiswa/tiket-saya",
         active: pathname.startsWith("/mahasiswa/tiket"),
       },
+      {
+        label: "Pengaturan",
+        icon: Settings,
+        href: "/settings",
+        active: pathname.startsWith("/settings"),
+      },
     ];
   }
 
@@ -103,6 +110,13 @@ export function Sidebar() {
         }
       );
     }
+
+    items.push({
+      label: "Pengaturan",
+      icon: Settings,
+      href: "/settings",
+      active: pathname.startsWith("/settings"),
+    });
 
     return items;
   }
