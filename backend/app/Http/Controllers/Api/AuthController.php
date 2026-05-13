@@ -169,9 +169,10 @@ class AuthController extends Controller
             ], 422);
         }
         
-        $user->update($request->only([
+        $user->fill($request->only([
             'name', 'email', 'nim', 'faculty', 'study_program', 'semester'
         ]));
+        $user->save();
         
         return response()->json([
             'success' => true,
@@ -210,13 +211,40 @@ class AuthController extends Controller
             ], 422);
         }
         
-        $user->update([
-            'password' => Hash::make($request->password)
-        ]);
+        $user->password = Hash::make($request->password);
+        $user->save();
         
         return response()->json([
             'success' => true,
             'message' => 'Password berhasil diperbarui',
+        ]);
+    }
+
+    /**
+     * Update avatar user
+     */
+    public function updateAvatar(Request $request): JsonResponse
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $user = $request->user();
+
+        // Hapus avatar lama jika ada
+        if ($user->avatar && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->avatar)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+        }
+
+        $path = $request->file('avatar')->store('avatars', 'public');
+        
+        $user->avatar = $path;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'data' => $user,
+            'message' => 'Foto profil berhasil diperbarui',
         ]);
     }
 }

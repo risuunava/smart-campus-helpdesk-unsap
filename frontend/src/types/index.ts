@@ -11,6 +11,8 @@ export interface User {
   semester?: number;
   role: "mahasiswa" | "admin" | "master_admin";
   is_active: boolean;
+  avatar?: string;
+  avatar_url?: string;
   created_at: string;
   updated_at: string;
 }

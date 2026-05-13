@@ -22,7 +22,10 @@ class User extends Authenticatable
         'semester',
         'role',
         'is_active',
+        'avatar',
     ];
+
+    protected $appends = ['avatar_url'];
 
     protected $hidden = [
         'password',
@@ -35,6 +38,11 @@ class User extends Authenticatable
         'is_active' => 'boolean',
         'semester' => 'integer',
     ];
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->avatar ? url('storage/' . $this->avatar) : null;
+    }
 
     // Helper methods untuk cek role
     public function isMahasiswa(): bool

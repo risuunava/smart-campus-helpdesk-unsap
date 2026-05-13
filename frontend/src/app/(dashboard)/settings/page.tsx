@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { User, Lock, Mail, BookOpen, GraduationCap, Shield } from "lucide-react";
+import { User, Lock, Mail, BookOpen, GraduationCap, Shield, Camera } from "lucide-react";
+import Image from "next/image";
 import { toast } from "sonner";
+import { api } from "@/lib/api";
+import { AvatarCropModal } from "@/components/ui/AvatarCropModal";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -27,33 +30,57 @@ export default function SettingsPage() {
 
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  // Crop modal state
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!user) return null;
+
+  // Step 1: User picks a file → open crop modal
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Reset input so same file can be re-selected
+    e.target.value = "";
+
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      if (typeof reader.result === "string") {
+        setCropImageSrc(reader.result);
+        setCropModalOpen(true);
+      }
+    });
+    reader.readAsDataURL(file);
+  };
+
+  // Step 2: Cropped blob → upload
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    setIsUploadingAvatar(true);
+    try {
+      const croppedFile = new File([croppedBlob], "avatar.jpg", { type: "image/jpeg" });
+      await api.updateAvatar(croppedFile);
+      toast.success("Foto profil berhasil diperbarui!");
+      setCropModalOpen(false);
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (error: any) {
+      toast.error(error.message || "Gagal memperbarui foto profil");
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsUpdatingProfile(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(profileForm),
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        toast.success("Profil berhasil diperbarui");
-        // Update user state if possible, or reload
-        setTimeout(() => window.location.reload(), 1000);
-      } else {
-        toast.error(data.message || "Gagal memperbarui profil");
-      }
-    } catch (error) {
-      toast.error("Terjadi kesalahan sistem");
+      await api.updateProfile(profileForm);
+      toast.success("Profil berhasil diperbarui");
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (error: any) {
+      toast.error(error.message || "Gagal memperbarui profil");
     } finally {
       setIsUpdatingProfile(false);
     }
@@ -64,32 +91,13 @@ export default function SettingsPage() {
     if (passwordForm.password !== passwordForm.password_confirmation) {
       return toast.error("Konfirmasi password tidak sesuai");
     }
-
     setIsUpdatingPassword(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/password`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(passwordForm),
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        toast.success("Password berhasil diperbarui");
-        setPasswordForm({
-          current_password: "",
-          password: "",
-          password_confirmation: "",
-        });
-      } else {
-        toast.error(data.message || "Gagal memperbarui password");
-      }
-    } catch (error) {
-      toast.error("Terjadi kesalahan sistem");
+      await api.updatePassword(passwordForm);
+      toast.success("Password berhasil diperbarui");
+      setPasswordForm({ current_password: "", password: "", password_confirmation: "" });
+    } catch (error: any) {
+      toast.error(error.message || "Gagal memperbarui password");
     } finally {
       setIsUpdatingPassword(false);
     }
@@ -114,6 +122,49 @@ export default function SettingsPage() {
             </div>
           </div>
           
+          <div className="p-6 border-b border-[#282828]">
+            <div className="flex items-center gap-6">
+              <div className="relative group">
+                <div className="w-24 h-24 rounded-full overflow-hidden bg-[#1a1a1a] border-2 border-[#333] flex items-center justify-center">
+                  {user.avatar_url ? (
+                    <Image 
+                      src={user.avatar_url} 
+                      alt={user.name} 
+                      width={96} 
+                      height={96} 
+                      className="object-cover w-full h-full"
+                      unoptimized
+                    />
+                  ) : (
+                    <User className="w-10 h-10 text-gray-500" />
+                  )}
+                </div>
+                <label 
+                  htmlFor="avatar-upload" 
+                  className={`absolute inset-0 bg-black/60 flex flex-col items-center justify-center rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity ${isUploadingAvatar ? 'opacity-100' : ''}`}
+                >
+                  <Camera className="w-6 h-6 text-white mb-1" />
+                  <span className="text-xs text-white font-medium">
+                    {isUploadingAvatar ? 'Uploading...' : 'Ubah Foto'}
+                  </span>
+                </label>
+                <input 
+                  ref={fileInputRef}
+                  id="avatar-upload" 
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={handleAvatarChange}
+                  disabled={isUploadingAvatar}
+                />
+              </div>
+              <div>
+                <h3 className="text-white font-medium">Foto Profil</h3>
+                <p className="text-sm text-gray-400 mt-1">Disarankan format JPG, PNG atau WebP. Maks 2MB.</p>
+              </div>
+            </div>
+          </div>
+
           <form onSubmit={handleProfileSubmit} className="p-6 space-y-5">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400">Nama Lengkap</label>
@@ -253,6 +304,15 @@ export default function SettingsPage() {
           </form>
         </div>
       </div>
+
+      {/* Avatar Crop Modal */}
+      <AvatarCropModal
+        isOpen={cropModalOpen}
+        imageSrc={cropImageSrc}
+        onClose={() => setCropModalOpen(false)}
+        onCropComplete={handleCropComplete}
+        isLoading={isUploadingAvatar}
+      />
     </div>
   );
 }

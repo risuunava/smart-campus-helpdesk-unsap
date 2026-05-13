@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::put('/auth/profile', [AuthController::class, 'updateProfile']);
     Route::put('/auth/password', [AuthController::class, 'updatePassword']);
+    Route::post('/auth/avatar', [AuthController::class, 'updateAvatar']);
     
     // Tickets - Specific routes BEFORE wildcard {id} routes
     Route::get('/tickets', [TicketController::class, 'index']);

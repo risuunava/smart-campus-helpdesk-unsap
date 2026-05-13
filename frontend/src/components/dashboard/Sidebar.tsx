@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export function Sidebar() {
   const { user, logout } = useAuth();
@@ -162,14 +163,23 @@ export function Sidebar() {
           {/* User Info */}
           <div className="p-4 border-b border-[#282828]">
             <div className="flex items-center gap-3 p-3 bg-[#1f1f1f] rounded-lg">
-              <div className="h-10 w-10 rounded-full flex items-center justify-center"
+              <div className="h-10 w-10 rounded-full flex items-center justify-center overflow-hidden shrink-0"
                 style={{
-                  background: user.role === "master_admin" ? "rgba(251, 191, 36, 0.15)" :
+                  background: user.avatar_url ? 'transparent' : (user.role === "master_admin" ? "rgba(251, 191, 36, 0.15)" :
                              user.role === "admin" ? "rgba(168, 85, 247, 0.15)" :
-                             "rgba(30, 215, 96, 0.15)"
+                             "rgba(30, 215, 96, 0.15)")
                 }}
               >
-                {user.role === "master_admin" ? (
+                {user.avatar_url ? (
+                  <Image 
+                    src={user.avatar_url} 
+                    alt={user.name} 
+                    width={40} 
+                    height={40} 
+                    className="object-cover w-full h-full"
+                    unoptimized
+                  />
+                ) : user.role === "master_admin" ? (
                   <Crown className="h-5 w-5 text-amber-400" />
                 ) : user.role === "admin" ? (
                   <Shield className="h-5 w-5 text-purple-400" />

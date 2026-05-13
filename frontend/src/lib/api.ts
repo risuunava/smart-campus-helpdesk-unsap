@@ -113,8 +113,65 @@ class ApiClient {
   }
 
   async getUser(): Promise<User> {
-    const response = await this.request<{ success: boolean; data: User }>("/auth/user");
+    const response = await this.request<{ success: boolean; data: User }>("/auth/user", {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache"
+      }
+    });
     return response.data;
+  }
+
+  async updateProfile(data: {
+    name: string;
+    email: string;
+    nim?: string;
+    faculty?: string;
+    study_program?: string;
+    semester?: string | number;
+  }): Promise<{ success: boolean; data: User; message: string }> {
+    return this.request("/auth/profile", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updatePassword(data: {
+    current_password: string;
+    password: string;
+    password_confirmation: string;
+  }): Promise<{ success: boolean; message: string }> {
+    return this.request("/auth/password", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateAvatar(file: File): Promise<{ success: boolean; data: User; message: string }> {
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    const headers: HeadersInit = {};
+    if (this.token) {
+      (headers as Record<string, string>)["Authorization"] = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(`${API_URL}/auth/avatar`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        ...headers,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Failed to update avatar");
+    }
+
+    return response.json();
   }
 
   // ============================================
