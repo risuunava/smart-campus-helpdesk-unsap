@@ -13,7 +13,12 @@ import {
   BarChart3,
   Fingerprint,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  Mail,
+  Phone,
+  MapPin,
+  TrendingUp,
+  Bot
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -47,8 +52,8 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
             <Link href="#fitur" className="hover:text-white transition-colors">Fitur</Link>
             <Link href="#solusi" className="hover:text-white transition-colors">Solusi AI</Link>
-            <Link href="#" className="hover:text-white transition-colors">Statistik</Link>
-            <Link href="#" className="hover:text-white transition-colors">Kontak</Link>
+            <Link href="#statistik" className="hover:text-white transition-colors">Statistik</Link>
+            <Link href="#kontak" className="hover:text-white transition-colors">Kontak</Link>
           </div>
 
           <div className="flex items-center gap-4">
@@ -205,6 +210,125 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Statistics Section */}
+      <section id="statistik" className="py-24 relative overflow-hidden bg-black">
+        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-[#1ed760]/5 blur-[120px] rounded-full pointer-events-none" />
+        <div className="container px-6 mx-auto relative z-10">
+          <div className="text-center mb-16">
+            <span className="text-[#1ed760] text-sm font-medium tracking-wide uppercase mb-4 block border border-[#1ed760]/20 w-fit mx-auto px-3 py-1 rounded-full bg-[#1ed760]/10">Performa Sistem</span>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-6">
+              Dipercaya oleh <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1ed760] to-emerald-400">AI Engine</span>
+            </h2>
+            <p className="text-gray-400 max-w-2xl mx-auto text-lg">
+              Sistem analitik cerdas kami bekerja 24/7 untuk memastikan setiap keluhan tertangani secara optimal dengan akurasi tinggi.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="p-8 rounded-[32px] bg-[#0a0a0a] border border-white/5 hover:border-[#1ed760]/20 transition-all duration-500 hover:bg-[#111111] text-center group">
+              <div className="w-14 h-14 rounded-2xl bg-[#1ed760]/10 border border-[#1ed760]/20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(30,215,96,0.15)]">
+                <Bot className="h-6 w-6 text-[#1ed760]" />
+              </div>
+              <h4 className="text-4xl md:text-5xl font-bold text-white mb-2">98<span className="text-[#1ed760]">%</span></h4>
+              <p className="text-sm text-gray-400 font-medium">Akurasi Klasifikasi AI</p>
+            </div>
+            <div className="p-8 rounded-[32px] bg-[#0a0a0a] border border-white/5 hover:border-[#1ed760]/20 transition-all duration-500 hover:bg-[#111111] text-center group">
+              <div className="w-14 h-14 rounded-2xl bg-[#1ed760]/10 border border-[#1ed760]/20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(30,215,96,0.15)]">
+                <Zap className="h-6 w-6 text-[#1ed760]" />
+              </div>
+              <h4 className="text-4xl md:text-5xl font-bold text-white mb-2">1.2<span className="text-[#1ed760]">m</span></h4>
+              <p className="text-sm text-gray-400 font-medium">Rata-rata Respon</p>
+            </div>
+            <div className="p-8 rounded-[32px] bg-[#0a0a0a] border border-white/5 hover:border-[#1ed760]/20 transition-all duration-500 hover:bg-[#111111] text-center group">
+              <div className="w-14 h-14 rounded-2xl bg-[#1ed760]/10 border border-[#1ed760]/20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(30,215,96,0.15)]">
+                <TrendingUp className="h-6 w-6 text-[#1ed760]" />
+              </div>
+              <h4 className="text-4xl md:text-5xl font-bold text-white mb-2">15<span className="text-[#1ed760]">k+</span></h4>
+              <p className="text-sm text-gray-400 font-medium">Tiket Diselesaikan</p>
+            </div>
+            <div className="p-8 rounded-[32px] bg-[#0a0a0a] border border-white/5 hover:border-[#1ed760]/20 transition-all duration-500 hover:bg-[#111111] text-center group">
+              <div className="w-14 h-14 rounded-2xl bg-[#1ed760]/10 border border-[#1ed760]/20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(30,215,96,0.15)]">
+                <Users className="h-6 w-6 text-[#1ed760]" />
+              </div>
+              <h4 className="text-4xl md:text-5xl font-bold text-white mb-2">24<span className="text-[#1ed760]">/7</span></h4>
+              <p className="text-sm text-gray-400 font-medium">Analisis Sentimen</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="kontak" className="py-24 relative overflow-hidden">
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="container px-6 mx-auto">
+          <div className="flex flex-col lg:flex-row gap-16 bg-[#050505] rounded-[40px] border border-white/5 p-8 md:p-12 lg:p-16">
+            <div className="flex-1">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-6">Butuh bantuan lebih lanjut?</h2>
+              <p className="text-gray-400 text-lg mb-12 max-w-md leading-relaxed">
+                Tim support kami dan asisten AI siap membantu menyelesaikan setiap kendala Anda di lingkungan kampus UNSAP.
+              </p>
+              
+              <div className="space-y-8">
+                <div className="flex items-center gap-6 group">
+                  <div className="w-16 h-16 rounded-2xl bg-[#0a0a0a] border border-white/10 flex items-center justify-center group-hover:border-[#1ed760]/50 transition-colors">
+                    <Mail className="h-6 w-6 text-gray-400 group-hover:text-[#1ed760] transition-colors" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Email Support</p>
+                    <p className="text-lg font-semibold text-white">helpdesk@unsap.ac.id</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-6 group">
+                  <div className="w-16 h-16 rounded-2xl bg-[#0a0a0a] border border-white/10 flex items-center justify-center group-hover:border-[#1ed760]/50 transition-colors">
+                    <Phone className="h-6 w-6 text-gray-400 group-hover:text-[#1ed760] transition-colors" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Telepon (Hotline)</p>
+                    <p className="text-lg font-semibold text-white">+62 811 2233 4455</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-6 group">
+                  <div className="w-16 h-16 rounded-2xl bg-[#0a0a0a] border border-white/10 flex items-center justify-center group-hover:border-[#1ed760]/50 transition-colors">
+                    <MapPin className="h-6 w-6 text-gray-400 group-hover:text-[#1ed760] transition-colors" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Lokasi Pusat Bantuan</p>
+                    <p className="text-lg font-semibold text-white">Gedung Rektorat UNSAP Lt. 2</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex-1">
+              <div className="bg-[#0a0a0a] rounded-3xl p-8 border border-white/5 relative overflow-hidden h-full">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#1ed760]/10 blur-[50px] rounded-full pointer-events-none" />
+                <h3 className="text-2xl font-bold text-white mb-8 relative z-10">Kirim Pesan Cepat</h3>
+                <form className="space-y-6 relative z-10" onSubmit={(e) => e.preventDefault()}>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-2">Nama Lengkap</label>
+                    <input type="text" className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#1ed760]/50 transition-colors" placeholder="Masukkan nama Anda" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-2">NPM / NIDN (Opsional)</label>
+                    <input type="text" className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#1ed760]/50 transition-colors" placeholder="Nomor Induk" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-2">Pesan Singkat</label>
+                    <textarea rows={4} className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#1ed760]/50 transition-colors resize-none" placeholder="Tuliskan pesan atau pertanyaan Anda..."></textarea>
+                  </div>
+                  <Button className="w-full bg-[#1ed760] text-black hover:bg-[#1ed760]/90 rounded-xl py-6 font-bold text-lg border-0 relative overflow-hidden group">
+                    <div className="absolute inset-0 -translate-x-[150%] group-hover:translate-x-[150%] bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 ease-in-out" />
+                    <span className="relative z-10">Kirim Pesan</span>
+                  </Button>
+                </form>
               </div>
             </div>
           </div>
