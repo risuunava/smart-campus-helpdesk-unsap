@@ -55,6 +55,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tickets/export', [TicketController::class, 'export']); // Export (Admin & Master Admin)
     Route::get('/tickets/{id}', [TicketController::class, 'show']);
     Route::put('/tickets/{id}', [TicketController::class, 'update']);
+    Route::post('/tickets/{id}/attachment', [TicketController::class, 'updateAttachment']);
+    Route::delete('/tickets/{id}/attachment', [TicketController::class, 'deleteAttachment']);
     
     // ML Correction (Master Admin only)
     Route::post('/tickets/{id}/correct-ml', [TicketController::class, 'correctMlLabel']);

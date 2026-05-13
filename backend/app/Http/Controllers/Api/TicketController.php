@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
@@ -361,6 +362,104 @@ class TicketController extends Controller
                 'success' => false,
                 'message' => 'Gagal mengupdate tiket',
             ], 500);
+        }
+    }
+
+    /**
+     * POST /api/tickets/{id}/attachment
+     * Update/Tambah lampiran tiket (Mahasiswa only for their own ticket)
+     */
+    public function updateAttachment(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+        $ticket = Ticket::find($id);
+
+        if (!$ticket) {
+            return response()->json(['success' => false, 'message' => 'Tiket tidak ditemukan'], 404);
+        }
+
+        if ($user->isMahasiswa() && $ticket->user_id !== $user->id) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses ke tiket ini'], 403);
+        }
+
+        if ($ticket->status === 'closed') {
+            return response()->json(['success' => false, 'message' => 'Tidak dapat mengubah lampiran pada tiket yang sudah ditutup'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'attachment' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            if ($ticket->attachment_path && Storage::disk('public')->exists($ticket->attachment_path)) {
+                Storage::disk('public')->delete($ticket->attachment_path);
+            }
+
+            $file = $request->file('attachment');
+            $attachmentType = $file->getClientOriginalExtension();
+            $attachmentPath = $file->store('tickets/' . date('Y/m'), 'public');
+
+            $ticket->attachment_path = $attachmentPath;
+            $ticket->attachment_type = $attachmentType;
+            $ticket->save();
+
+            return response()->json([
+                'success' => true,
+                'data' => $ticket->fresh(),
+                'message' => 'Lampiran berhasil diperbarui',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error updating attachment: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal memperbarui lampiran'], 500);
+        }
+    }
+
+    /**
+     * DELETE /api/tickets/{id}/attachment
+     * Hapus lampiran tiket (Mahasiswa only for their own ticket)
+     */
+    public function deleteAttachment(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+        $ticket = Ticket::find($id);
+
+        if (!$ticket) {
+            return response()->json(['success' => false, 'message' => 'Tiket tidak ditemukan'], 404);
+        }
+
+        if ($user->isMahasiswa() && $ticket->user_id !== $user->id) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses ke tiket ini'], 403);
+        }
+
+        if ($ticket->status === 'closed') {
+            return response()->json(['success' => false, 'message' => 'Tidak dapat menghapus lampiran pada tiket yang sudah ditutup'], 403);
+        }
+
+        try {
+            if ($ticket->attachment_path && Storage::disk('public')->exists($ticket->attachment_path)) {
+                Storage::disk('public')->delete($ticket->attachment_path);
+            }
+
+            $ticket->attachment_path = null;
+            $ticket->attachment_type = null;
+            $ticket->save();
+
+            return response()->json([
+                'success' => true,
+                'data' => $ticket->fresh(),
+                'message' => 'Lampiran berhasil dihapus',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error deleting attachment: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal menghapus lampiran'], 500);
         }
     }
 
