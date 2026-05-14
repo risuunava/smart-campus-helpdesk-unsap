@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
-import { User, Mail, BookOpen, GraduationCap, Shield, Fingerprint } from "lucide-react";
+import { User, Mail, BookOpen, GraduationCap, Shield, Fingerprint, Pencil } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -13,20 +13,22 @@ export default function ProfilePage() {
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Profil Saya</h1>
-          <p className="text-sm text-gray-400 mt-1">Informasi detail akun Anda</p>
-        </div>
-        <Link href="/settings">
-          <Button variant="outline" className="border-[#333] text-white hover:bg-[#1f1f1f] hover:text-white bg-[#1a1a1a]">
-            Edit Profil
-          </Button>
-        </Link>
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold text-white tracking-tight">Profil Saya</h1>
+        <p className="text-sm text-gray-400 mt-1">Informasi detail akun Anda</p>
       </div>
 
       <div className="bg-[#1a1a1a] border border-[#282828] rounded-2xl overflow-hidden shadow-xl">
-        <div className="h-32 bg-gradient-to-r from-[#1ed760]/20 to-[#121212] relative">
+        <div className="h-32 bg-gradient-to-r from-[#1ed760]/20 to-[#121212] relative group">
+          
+          <Link href="/settings" className="absolute top-4 right-4 z-10 group" title="Edit Profil">
+            <Button variant="outline" size="icon" className="h-9 w-9 rounded-full bg-[#121212]/80 backdrop-blur-md border-white/5 text-gray-300 hover:bg-[#1ed760] hover:text-black hover:border-[#1ed760] transition-all shadow-lg relative overflow-hidden">
+              {/* Curved top green highlight using inset shadow */}
+              <div className="absolute inset-0 rounded-full shadow-[inset_0px_1.5px_2px_0px_rgba(30,215,96,0.6)] opacity-100 group-hover:opacity-0 transition-opacity pointer-events-none" />
+              <Pencil className="h-4 w-4 relative z-10" />
+            </Button>
+          </Link>
+
           <div className="absolute -bottom-12 left-8">
             <div className="w-24 h-24 rounded-full bg-[#121212] border-4 border-[#1a1a1a] flex items-center justify-center overflow-hidden">
               {user.avatar_url ? (

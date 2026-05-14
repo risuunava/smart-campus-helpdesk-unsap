@@ -279,6 +279,59 @@
   .pulse-glow {
     animation: pulseGlow 2s infinite;
   }
+
+  /* Shine effect for buttons */
+  @keyframes shine {
+    from {
+      left: -100%;
+    }
+    to {
+      left: 200%;
+    }
+  }
+
+  .animate-shine {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .animate-shine::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -100%;
+    width: 50%;
+    height: 200%;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(30deg);
+  }
+
+  .animate-shine:active::after {
+    animation: shine 0.6s ease-in-out;
+  }
+
+  /* Glossy Dark Surface */
+  .glossy-card {
+    background: linear-gradient(165deg, #1a1a1a 0%, #121212 100%);
+    position: relative;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .glossy-card::before {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    z-index: -1;
+    margin: -1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(30, 215, 96, 0.5), rgba(30, 215, 96, 0.05), rgba(30, 215, 96, 0.2));
+  }
 }
 
 /* ============================================

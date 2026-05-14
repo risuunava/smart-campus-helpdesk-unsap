@@ -7,12 +7,21 @@ import { Ticket } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getPriorityColor, getStatusColor, timeAgo, formatDate } from "@/lib/utils";
 import Link from "next/link";
-import { Plus, Search, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, Eye, ChevronLeft, ChevronRight, Filter, ArrowUpDown } from "lucide-react";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 
 export default function TiketSayaPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("created_at");
+  const [sortOrder, setSortOrder] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -20,7 +29,7 @@ export default function TiketSayaPage() {
 
   useEffect(() => {
     fetchTickets();
-  }, [currentPage, search]);
+  }, [currentPage, search, sortBy, sortOrder]);
 
   async function fetchTickets() {
     setIsLoading(true);
@@ -29,6 +38,8 @@ export default function TiketSayaPage() {
         page: currentPage,
         per_page: 10,
         search: search || undefined,
+        sort_by: sortBy,
+        sort_order: sortOrder,
       });
       setTickets(response.data.data);
       setLastPage(response.data.last_page);
@@ -56,15 +67,43 @@ export default function TiketSayaPage() {
         </Link>
       </div>
 
-      {/* Search */}
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#666666]" />
-        <input
-          placeholder="Cari tiket..."
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-          className="w-full bg-[#1f1f1f] border border-[#4d4d4d] text-white placeholder:text-[#666666] rounded-full pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#1ed760]/40 focus:border-[#1ed760] outline-none transition-all"
-        />
+      {/* Search & Sort */}
+      <div className="flex flex-col md:flex-row gap-4 mb-8">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#666666]" />
+          <input
+            placeholder="Cari tiket berdasarkan judul atau kode..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+            className="w-full bg-[#1f1f1f] border border-[#4d4d4d] text-white placeholder:text-[#666666] rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#1ed760]/40 focus:border-[#1ed760] outline-none transition-all"
+          />
+        </div>
+        <div className="flex gap-2">
+          <div className="w-[180px]">
+            <Select 
+              value={sortBy} 
+              onValueChange={(val) => { setSortBy(val); setCurrentPage(1); }}
+            >
+              <SelectTrigger className="bg-[#1f1f1f] border-[#4d4d4d] text-white rounded-xl">
+                <Filter className="h-4 w-4 mr-2 text-[#666666]" />
+                <SelectValue placeholder="Urutkan..." />
+              </SelectTrigger>
+              <SelectContent className="bg-[#1f1f1f] border-[#282828] text-white">
+                <SelectItem value="created_at">Tanggal Dibuat</SelectItem>
+                <SelectItem value="priority">Prioritas</SelectItem>
+                <SelectItem value="status">Status</SelectItem>
+                <SelectItem value="title">Judul</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <button
+            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+            className="p-2.5 bg-[#1f1f1f] border border-[#4d4d4d] text-[#b3b3b3] hover:text-white rounded-xl transition-all"
+            title={sortOrder === "asc" ? "Urutan Menurun" : "Urutan Menaik"}
+          >
+            <ArrowUpDown className={`h-4 w-4 transition-transform duration-300 ${sortOrder === "asc" ? "" : "rotate-180"}`} />
+          </button>
+        </div>
       </div>
 
       {/* Ticket List */}

@@ -186,6 +186,8 @@ class ApiClient {
     priority?: string;
     category?: string;
     search?: string;
+    sort_by?: string;
+    sort_order?: string;
   }): Promise<TicketListResponse> {
     const searchParams = new URLSearchParams();
     if (params) {
