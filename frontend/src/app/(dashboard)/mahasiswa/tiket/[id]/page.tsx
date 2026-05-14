@@ -279,9 +279,8 @@ export default function TicketDetailMahasiswaPage() {
                         key={chat.id}
                         className={`flex gap-3 ${isSelf ? "flex-row-reverse" : "flex-row"}`}
                       >
-                        {/* Avatar / Icon Side */}
                         <div className="flex-shrink-0">
-                          <div className={`h-10 w-10 rounded-full flex items-center justify-center border ${
+                          <div className={`h-10 w-10 overflow-hidden rounded-full flex items-center justify-center border ${
                             isSelf 
                               ? "bg-[#1ed760]/10 border-[#1ed760]/30 text-[#1ed760]" 
                               : chat.sender?.role === "master_admin"
@@ -290,7 +289,13 @@ export default function TicketDetailMahasiswaPage() {
                               ? "bg-purple-500/10 border-purple-500/30 text-purple-400"
                               : "bg-[#282828] border-[#333333] text-[#b3b3b3]"
                           }`}>
-                            {isAdmin ? <Shield className="h-5 w-5" /> : <User className="h-5 w-5" />}
+                            {chat.sender?.avatar_url && (!isSelf || !ticket.is_anonymous) ? (
+                              <img src={chat.sender.avatar_url} alt="avatar" className="h-full w-full object-cover" />
+                            ) : isAdmin ? (
+                              <Shield className="h-5 w-5" />
+                            ) : (
+                              <User className="h-5 w-5" />
+                            )}
                           </div>
                         </div>
 

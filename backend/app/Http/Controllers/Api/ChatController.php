@@ -25,7 +25,7 @@ class ChatController extends Controller
         }
 
         $chats = Chat::where('ticket_id', $ticketId)
-            ->with(['sender:id,name,role'])
+            ->with(['sender:id,name,role,avatar'])
             ->orderBy('created_at', 'asc')
             ->get();
 
@@ -36,6 +36,7 @@ class ChatController extends Controller
                 // Mask jika pengirim adalah mahasiswa DAN (user yang melihat adalah orang lain)
                 if ($chat->sender_type === 'mahasiswa' && $chat->sender_id !== $currentUser->id) {
                     $chat->sender->name = $ticket->anonymous_code;
+                    $chat->sender->avatar = null;
                 }
                 return $chat;
             });
@@ -80,7 +81,7 @@ class ChatController extends Controller
         ]);
 
         // Load relasi sender agar response lengkap
-        $chat->load('sender:id,name,role');
+        $chat->load('sender:id,name,role,avatar');
 
         // Sembunyikan identitas jika tiket anonim dan user bukan Master Admin
         $currentUser = $request->user();
@@ -88,6 +89,7 @@ class ChatController extends Controller
             // Mask jika pengirim adalah mahasiswa DAN (user yang melihat adalah orang lain)
             if ($chat->sender_type === 'mahasiswa' && $chat->sender_id !== $currentUser->id) {
                 $chat->sender->name = $ticket->anonymous_code;
+                $chat->sender->avatar = null;
             }
         }
 
