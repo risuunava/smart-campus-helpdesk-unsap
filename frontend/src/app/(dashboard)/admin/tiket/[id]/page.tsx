@@ -281,8 +281,9 @@ export default function TicketDetailAdminPage() {
               </div>
             ) : (
               chats.map((chat) => {
-                const isSelf = chat.sender_type === "admin";
+                const isSelf = chat.sender_id === user?.id;
                 const isMahasiswa = chat.sender_type === "mahasiswa";
+                const isAdmin = chat.sender_type === "admin";
                 const isSystem = chat.sender_type === "system";
 
                 if (isSystem) {

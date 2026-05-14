@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { Ticket, Chat } from "@/types";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +33,7 @@ import {
 export default function TicketDetailMahasiswaPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -259,7 +261,7 @@ export default function TicketDetailMahasiswaPage() {
                   </div>
                 ) : (
                   chats.map((chat) => {
-                    const isSelf = chat.sender_type === "mahasiswa";
+                    const isSelf = chat.sender_id === user?.id;
                     const isAdmin = chat.sender_type === "admin";
                     const isSystem = chat.sender_type === "system";
 
