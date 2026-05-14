@@ -102,12 +102,11 @@ class ChatController extends Controller
         $sender = $request->user();
 
         if ($sender->isMahasiswa()) {
-            // Mahasiswa kirim pesan → notif ke admin yang di-assign (jika ada)
             $recipientId = $ticket->assigned_to ?? null;
-            // Jika belum ada admin yang di-assign, notif ke semua admin?
-            // Untuk kesederhanaan: hanya notif ke assigned_to jika ada
+            $senderName = $ticket->is_anonymous ? $ticket->anonymous_code : $sender->name;
+            
             if ($recipientId) {
-                $senderName = $ticket->is_anonymous ? $ticket->anonymous_code : $sender->name;
+                // Notif ke admin yang di-assign
                 Notification::send(
                     $recipientId,
                     'chat_received',
@@ -116,6 +115,19 @@ class ChatController extends Controller
                     ['ticket_code' => $ticket->ticket_code, 'sender_name' => $senderName],
                     $ticket->id
                 );
+            } else {
+                // Jika belum ada yang di-assign, notif ke semua admin
+                $admins = \App\Models\User::whereIn('role', ['admin', 'master_admin'])->where('is_active', true)->get();
+                foreach ($admins as $admin) {
+                    Notification::send(
+                        $admin->id,
+                        'chat_received',
+                        'Pesan Baru di Tiket',
+                        $senderName . ' mengirim pesan di tiket #' . $ticket->ticket_code . ': "' . mb_substr($request->message, 0, 80) . '"',
+                        ['ticket_code' => $ticket->ticket_code, 'sender_name' => $senderName],
+                        $ticket->id
+                    );
+                }
             }
         } else {
             // Admin kirim pesan → notif ke pemilik tiket (mahasiswa)

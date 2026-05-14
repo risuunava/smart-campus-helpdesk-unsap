@@ -208,6 +208,20 @@ class TicketController extends Controller
                 ['ticket_code' => $ticket->ticket_code, 'category' => $ticket->category],
                 $ticket->id
             );
+
+            // Kirim notifikasi ke semua admin dan master admin
+            $admins = User::whereIn('role', ['admin', 'master_admin'])->where('is_active', true)->get();
+            foreach ($admins as $admin) {
+                Notification::send(
+                    $admin->id,
+                    'new_ticket',
+                    'Tiket Baru Masuk',
+                    'Tiket baru "' . $ticket->title . '" (#' . $ticket->ticket_code . ') telah dibuat. Segera lakukan pengecekan.',
+                    ['ticket_code' => $ticket->ticket_code, 'category' => $ticket->category],
+                    $ticket->id
+                );
+            }
+
             
             return response()->json([
                 'success' => true,
