@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ChatController;
@@ -79,6 +80,14 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // FAQ Management (Admin)
     Route::apiResource('/faqs', FaqController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::put('/notifications/read-all', [NotificationController::class, 'markAllRead']);
+    Route::delete('/notifications/clear-read', [NotificationController::class, 'clearRead']);
+    Route::put('/notifications/{id}/read', [NotificationController::class, 'markRead']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
     
 });
 

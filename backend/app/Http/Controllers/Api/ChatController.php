@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Chat;
+use App\Models\Notification;
 use App\Models\Ticket;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -95,6 +96,37 @@ class ChatController extends Controller
             // event(new \App\Events\NewChatMessage($chat));
         } catch (\Throwable $e) {
             // Reverb mungkin tidak aktif; abaikan error
+        }
+
+        // ── Kirim notifikasi ke pihak lain ──────────────────────────────
+        $sender = $request->user();
+
+        if ($sender->isMahasiswa()) {
+            // Mahasiswa kirim pesan → notif ke admin yang di-assign (jika ada)
+            $recipientId = $ticket->assigned_to ?? null;
+            // Jika belum ada admin yang di-assign, notif ke semua admin?
+            // Untuk kesederhanaan: hanya notif ke assigned_to jika ada
+            if ($recipientId) {
+                $senderName = $ticket->is_anonymous ? $ticket->anonymous_code : $sender->name;
+                Notification::send(
+                    $recipientId,
+                    'chat_received',
+                    'Pesan Baru di Tiket',
+                    $senderName . ' mengirim pesan di tiket #' . $ticket->ticket_code . ': "' . mb_substr($request->message, 0, 80) . '"',
+                    ['ticket_code' => $ticket->ticket_code, 'sender_name' => $senderName],
+                    $ticket->id
+                );
+            }
+        } else {
+            // Admin kirim pesan → notif ke pemilik tiket (mahasiswa)
+            Notification::send(
+                $ticket->user_id,
+                'chat_received',
+                'Balasan dari Admin',
+                'Admin membalas tiket #' . $ticket->ticket_code . ': "' . mb_substr($request->message, 0, 80) . '"',
+                ['ticket_code' => $ticket->ticket_code, 'sender_name' => $sender->name],
+                $ticket->id
+            );
         }
 
         return response()->json([

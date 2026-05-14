@@ -172,3 +172,35 @@ export interface CategoryDistribution {
   category: string;
   total: number;
 }
+
+// ============================================
+// NOTIFICATION TYPES
+// ============================================
+export type NotificationType =
+  | "ticket_created"
+  | "ticket_status_changed"
+  | "chat_received"
+  | "profile_updated"
+  | "password_changed"
+  | "avatar_updated";
+
+export interface Notification {
+  id: number;
+  user_id: number;
+  type: NotificationType;
+  title: string;
+  body: string;
+  data?: Record<string, any>;
+  ticket_id?: number;
+  read_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NotificationListResponse {
+  success: boolean;
+  data: {
+    notifications: Notification[];
+    unread_count: number;
+  };
+}

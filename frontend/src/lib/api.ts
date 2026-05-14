@@ -11,7 +11,9 @@ import {
   FAQSuggestion,
   CategoryDistribution,
   CampusMood,
-  Chat
+  Chat,
+  Notification,
+  NotificationListResponse,
 } from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
@@ -336,6 +338,33 @@ class ApiClient {
     }
     const query = searchParams.toString() ? `?${searchParams.toString()}` : "";
     return this.request(`/tickets/export${query}`);
+  }
+
+  // ============================================
+  // NOTIFICATION ENDPOINTS
+  // ============================================
+  async getNotifications(): Promise<NotificationListResponse> {
+    return this.request("/notifications");
+  }
+
+  async getUnreadCount(): Promise<{ success: boolean; data: { unread_count: number } }> {
+    return this.request("/notifications/unread-count");
+  }
+
+  async markNotificationRead(id: number): Promise<{ success: boolean; message: string }> {
+    return this.request(`/notifications/${id}/read`, { method: "PUT" });
+  }
+
+  async markAllNotificationsRead(): Promise<{ success: boolean; message: string }> {
+    return this.request("/notifications/read-all", { method: "PUT" });
+  }
+
+  async deleteNotification(id: number): Promise<{ success: boolean; message: string }> {
+    return this.request(`/notifications/${id}`, { method: "DELETE" });
+  }
+
+  async clearReadNotifications(): Promise<{ success: boolean; message: string }> {
+    return this.request("/notifications/clear-read", { method: "DELETE" });
   }
 }
 

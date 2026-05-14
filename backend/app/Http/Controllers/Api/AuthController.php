@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -173,6 +174,15 @@ class AuthController extends Controller
             'name', 'email', 'nim', 'faculty', 'study_program', 'semester'
         ]));
         $user->save();
+
+        // Kirim notifikasi profil diperbarui
+        Notification::send(
+            $user->id,
+            'profile_updated',
+            'Profil Diperbarui',
+            'Informasi profil Anda berhasil diperbarui.',
+            ['updated_fields' => array_keys($request->only(['name', 'email', 'nim', 'faculty', 'study_program', 'semester']))]
+        );
         
         return response()->json([
             'success' => true,
@@ -213,6 +223,14 @@ class AuthController extends Controller
         
         $user->password = Hash::make($request->password);
         $user->save();
+
+        // Kirim notifikasi password berubah
+        Notification::send(
+            $user->id,
+            'password_changed',
+            'Password Diperbarui',
+            'Password akun Anda berhasil diubah. Jika bukan Anda, segera hubungi admin.'
+        );
         
         return response()->json([
             'success' => true,
@@ -240,6 +258,14 @@ class AuthController extends Controller
         
         $user->avatar = $path;
         $user->save();
+
+        // Kirim notifikasi foto profil berubah
+        Notification::send(
+            $user->id,
+            'avatar_updated',
+            'Foto Profil Diperbarui',
+            'Foto profil Anda berhasil diperbarui.'
+        );
 
         return response()->json([
             'success' => true,

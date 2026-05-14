@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/hooks/useNotifications";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { 
@@ -16,7 +17,8 @@ import {
   Crown,
   Menu,
   X,
-  Settings
+  Settings,
+  Bell
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
@@ -24,6 +26,7 @@ import Image from "next/image";
 
 export function Sidebar() {
   const { user, logout } = useAuth();
+  const { unreadCount } = useNotifications();
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -36,6 +39,7 @@ export function Sidebar() {
     href: string;
     active: boolean;
     highlight?: boolean;
+    badge?: number;
   }
 
   const isAdmin = user.role === "admin" || user.role === "master_admin";
@@ -63,6 +67,13 @@ export function Sidebar() {
         icon: Ticket,
         href: "/mahasiswa/tiket-saya",
         active: pathname.startsWith("/mahasiswa/tiket"),
+      },
+      {
+        label: "Notifikasi",
+        icon: Bell,
+        href: "/notifications",
+        active: pathname === "/notifications",
+        badge: unreadCount,
       },
       {
         label: "Pengaturan",
@@ -112,12 +123,21 @@ export function Sidebar() {
       );
     }
 
-    items.push({
-      label: "Pengaturan",
-      icon: Settings,
-      href: "/settings",
-      active: pathname.startsWith("/settings"),
-    });
+    items.push(
+      {
+        label: "Notifikasi",
+        icon: Bell,
+        href: "/notifications",
+        active: pathname === "/notifications",
+        badge: unreadCount,
+      },
+      {
+        label: "Pengaturan",
+        icon: Settings,
+        href: "/settings",
+        active: pathname.startsWith("/settings"),
+      }
+    );
 
     return items;
   }
@@ -215,9 +235,13 @@ export function Sidebar() {
                     item.highlight ? "text-[#1ed760]" : ""
                   }`} />
                   <span>{item.label}</span>
-                  {item.active && (
+                  {item.badge && item.badge > 0 ? (
+                    <span className="ml-auto px-1.5 py-0.5 bg-[#1ed760] text-black text-[10px] font-bold rounded-full min-w-[18px] text-center">
+                      {item.badge > 9 ? "9+" : item.badge}
+                    </span>
+                  ) : item.active ? (
                     <div className="ml-auto w-1 h-5 bg-[#1ed760] rounded-full" />
-                  )}
+                  ) : null}
                 </div>
               </Link>
             ))}

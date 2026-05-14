@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\ProcessTicketML;
+use App\Models\Notification;
 use App\Models\Ticket;
 use App\Models\TicketRateLimit;
 use App\Models\User;
@@ -197,6 +198,16 @@ class TicketController extends Controller
             
             // Jalankan ML Processing secara async (Job Queue)
             ProcessTicketML::dispatch($ticket);
+
+            // Kirim notifikasi ke pembuat tiket
+            Notification::send(
+                $user->id,
+                'ticket_created',
+                'Tiket Berhasil Dibuat',
+                'Tiket "' . $ticket->title . '" (#' . $ticket->ticket_code . ') telah berhasil dibuat dan sedang diproses.',
+                ['ticket_code' => $ticket->ticket_code, 'category' => $ticket->category],
+                $ticket->id
+            );
             
             return response()->json([
                 'success' => true,
@@ -341,6 +352,26 @@ class TicketController extends Controller
             $ticket->save();
             
             DB::commit();
+
+            // Kirim notifikasi ke pemilik tiket jika statusnya berubah
+            if ($request->has('status')) {
+                $statusLabels = [
+                    'open'        => 'Terbuka',
+                    'in_progress' => 'Sedang Diproses',
+                    'resolved'    => 'Selesai',
+                    'closed'      => 'Ditutup',
+                ];
+                $statusLabel = $statusLabels[$request->status] ?? $request->status;
+
+                Notification::send(
+                    $ticket->user_id,
+                    'ticket_status_changed',
+                    'Status Tiket Diperbarui',
+                    'Tiket "' . $ticket->title . '" (#' . $ticket->ticket_code . ') kini berstatus: ' . $statusLabel . '.',
+                    ['ticket_code' => $ticket->ticket_code, 'new_status' => $request->status, 'status_label' => $statusLabel],
+                    $ticket->id
+                );
+            }
             
             // Clear cache dashboard setelah update tiket
             Cache::forget('dashboard:stats');
