@@ -21,6 +21,7 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   ArrowUpDown,
   Eye,
   AlertCircle,
@@ -82,27 +83,33 @@ export function TicketTable() {
             className="w-full bg-[#1f1f1f] border border-[#4d4d4d] text-white placeholder:text-[#666666] rounded-full pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#1ed760]/40 focus:border-[#1ed760] outline-none transition-all"
           />
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-          className="bg-[#1f1f1f] border border-[#4d4d4d] text-white rounded-full px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#1ed760]/40 focus:border-[#1ed760] outline-none w-[160px]"
-        >
-          <option value="all">Semua Status</option>
-          <option value="open">Terbuka</option>
-          <option value="in_progress">Diproses</option>
-          <option value="resolved">Selesai</option>
-          <option value="closed">Ditutup</option>
-        </select>
-        <select
-          value={priorityFilter}
-          onChange={(e) => { setPriorityFilter(e.target.value); setCurrentPage(1); }}
-          className="bg-[#1f1f1f] border border-[#4d4d4d] text-white rounded-full px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#1ed760]/40 focus:border-[#1ed760] outline-none w-[160px]"
-        >
-          <option value="all">Semua Prioritas</option>
-          <option value="urgent">Urgent</option>
-          <option value="normal">Normal</option>
-          <option value="low">Low</option>
-        </select>
+        <div className="relative">
+          <select
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+            className="appearance-none bg-[#1f1f1f] border border-[#4d4d4d] text-white rounded-full pl-4 pr-10 py-2.5 text-sm focus:ring-2 focus:ring-[#1ed760]/40 focus:border-[#1ed760] outline-none w-[160px] cursor-pointer peer"
+          >
+            <option value="all">Semua Status</option>
+            <option value="open">Terbuka</option>
+            <option value="in_progress">Diproses</option>
+            <option value="resolved">Selesai</option>
+            <option value="closed">Ditutup</option>
+          </select>
+          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#b3b3b3] pointer-events-none transition-transform duration-300 peer-focus:rotate-180" />
+        </div>
+        <div className="relative">
+          <select
+            value={priorityFilter}
+            onChange={(e) => { setPriorityFilter(e.target.value); setCurrentPage(1); }}
+            className="appearance-none bg-[#1f1f1f] border border-[#4d4d4d] text-white rounded-full pl-4 pr-10 py-2.5 text-sm focus:ring-2 focus:ring-[#1ed760]/40 focus:border-[#1ed760] outline-none w-[160px] cursor-pointer peer"
+          >
+            <option value="all">Semua Prioritas</option>
+            <option value="urgent">Urgent</option>
+            <option value="normal">Normal</option>
+            <option value="low">Low</option>
+          </select>
+          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#b3b3b3] pointer-events-none transition-transform duration-300 peer-focus:rotate-180" />
+        </div>
       </div>
 
       {/* Table */}

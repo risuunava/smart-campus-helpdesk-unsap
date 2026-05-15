@@ -14,6 +14,39 @@ import {
   Meh,
   CalendarDays
 } from "lucide-react";
+import { 
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid
+} from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent
+} from "@/components/ui/chart";
+
+const sentimentChartConfig = {
+  sentiment: {
+    label: "Skor Sentimen",
+    color: "#1ed760",
+  },
+} satisfies ChartConfig;
+
+const ticketDistributionConfig = {
+  low: {
+    label: "Low (Aman)",
+    color: "#1ed760",
+  },
+  normal: {
+    label: "Normal",
+    color: "#ffa42b",
+  },
+  urgent: {
+    label: "Urgent (Kritis)",
+    color: "#f3727f",
+  },
+} satisfies ChartConfig;
 
 export default function CampusMoodPage() {
   const [moodData, setMoodData] = useState<CampusMood[]>([]);
@@ -50,7 +83,6 @@ export default function CampusMoodPage() {
     const totalUrgent = data.reduce((sum, d) => sum + d.urgent, 0);
     const avgSentiment = data.reduce((sum, d) => sum + d.sentiment_score, 0) / data.length;
 
-    // Calculate trend
     const firstHalf = data.slice(0, Math.floor(data.length / 2));
     const secondHalf = data.slice(Math.floor(data.length / 2));
     const firstAvg = firstHalf.length ? firstHalf.reduce((sum, d) => sum + d.sentiment_score, 0) / firstHalf.length : 0;
@@ -91,7 +123,7 @@ export default function CampusMoodPage() {
             Campus Mood Analytics
           </h1>
           <p className="text-[#b3b3b3] mt-1">
-            Analisis sentimen dan tren laporan mahasiswa
+            Analisis visual sentimen dan tren laporan mahasiswa
           </p>
         </div>
         <div className="relative">
@@ -146,101 +178,152 @@ export default function CampusMoodPage() {
         </div>
       </div>
 
-      {/* Mood Chart */}
-      <div className="bg-[#181818] border border-[#282828] rounded-xl">
-        <div className="px-6 pt-6 pb-2 border-b border-[#282828]">
-          <h3 className="text-lg font-bold text-white">Tren Sentimen Bulanan</h3>
-          <p className="text-sm text-[#b3b3b3] mb-4">Skor sentimen berdasarkan distribusi prioritas tiket (0-100)</p>
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Sentiment Trend Chart */}
+        <div className="bg-[#181818] border border-[#282828] rounded-xl overflow-hidden">
+          <div className="px-6 pt-6 pb-2 border-b border-[#282828]">
+            <h3 className="text-lg font-bold text-white">Tren Sentimen</h3>
+            <p className="text-sm text-[#b3b3b3]">Skor kebahagiaan kampus (0-100)</p>
+          </div>
+          <div className="p-6">
+            {isLoading ? (
+              <Skeleton className="h-[250px] w-full bg-[#282828]" />
+            ) : moodData.length === 0 ? (
+              <div className="flex h-[250px] items-center justify-center text-[#666666]">Belum ada data</div>
+            ) : (
+              <ChartContainer config={sentimentChartConfig} className="min-h-[250px] w-full">
+                <LineChart accessibilityLayer data={moodData} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
+                  <CartesianGrid vertical={true} horizontal={true} stroke="#2a2a2a" strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="month"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={12}
+                    stroke="#888888"
+                    fontSize={12}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={12}
+                    stroke="#888888"
+                    fontSize={12}
+                    domain={[0, 100]}
+                  />
+                  <ChartTooltip cursor={{ stroke: '#333', strokeWidth: 1 }} content={<ChartTooltipContent indicator="line" />} />
+                  <Line
+                    type="linear"
+                    dataKey="sentiment_score"
+                    name="Skor Sentimen"
+                    stroke="var(--color-sentiment)"
+                    strokeWidth={2.5}
+                    dot={{ fill: '#181818', stroke: 'var(--color-sentiment)', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, fill: 'var(--color-sentiment)', stroke: '#181818', strokeWidth: 4 }}
+                  />
+                </LineChart>
+              </ChartContainer>
+            )}
+          </div>
+        </div>
+
+        {/* Ticket Distribution Chart */}
+        <div className="bg-[#181818] border border-[#282828] rounded-xl overflow-hidden">
+          <div className="px-6 pt-6 pb-2 border-b border-[#282828]">
+            <h3 className="text-lg font-bold text-white">Distribusi Tiket</h3>
+            <p className="text-sm text-[#b3b3b3]">Berdasarkan tingkat prioritas laporan</p>
+          </div>
+          <div className="p-6">
+            {isLoading ? (
+              <Skeleton className="h-[250px] w-full bg-[#282828]" />
+            ) : moodData.length === 0 ? (
+              <div className="flex h-[250px] items-center justify-center text-[#666666]">Belum ada data</div>
+            ) : (
+              <ChartContainer config={ticketDistributionConfig} className="min-h-[250px] w-full">
+                <BarChart accessibilityLayer data={moodData} margin={{ top: 20, right: 20, left: 0, bottom: 0 }} barGap={2}>
+                  <CartesianGrid vertical={false} horizontal={true} stroke="#2a2a2a" strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="month"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={12}
+                    stroke="#888888"
+                    fontSize={12}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={12}
+                    stroke="#888888"
+                    fontSize={12}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent indicator="dashed" />} cursor={{ fill: '#282828', opacity: 0.4 }} />
+                  <ChartLegend content={<ChartLegendContent />} />
+                  <Bar dataKey="low" fill="var(--color-low)" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="normal" fill="var(--color-normal)" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="urgent" fill="var(--color-urgent)" radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ChartContainer>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Detailed Breakdown */}
+      <div className="bg-[#181818] border border-[#282828] rounded-xl overflow-hidden">
+        <div className="px-6 pt-6 pb-4 border-b border-[#282828]">
+          <h3 className="text-lg font-bold text-white">Rincian Data Bulanan</h3>
         </div>
         <div className="p-6">
           {isLoading ? (
             <div className="space-y-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-20 w-full bg-[#282828]" />
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full bg-[#282828]" />
               ))}
             </div>
           ) : moodData.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-[#666666]">Belum ada data</p>
-            </div>
+            <p className="text-center text-[#666666] py-4">Belum ada data</p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {moodData.map((item, index) => (
                 <div
                   key={index}
-                  className={`p-5 rounded-xl border ${getSentimentBg(item.sentiment_score)} transition-all hover:scale-[1.01]`}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border ${getSentimentBg(item.sentiment_score)} transition-all hover:bg-[#1f1f1f] gap-4`}
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-3">
-                    <div className="flex items-center gap-3">
-                      <span className="font-semibold text-white w-24">{item.month}</span>
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 text-center">
                       {getSentimentEmoji(item.sentiment_score)}
-                      <span className={`font-bold ${getSentimentColor(item.sentiment_score)} text-lg`}>
-                        {item.sentiment_score}%
-                      </span>
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-[#f3727f]/10 text-[#f3727f] border border-[#f3727f]/20">
-                        {item.urgent} Urgent
-                      </span>
-                      <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-[#ffa42b]/10 text-[#ffa42b] border border-[#ffa42b]/20">
-                        {item.normal} Normal
-                      </span>
-                      <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-[#1ed760]/10 text-[#1ed760] border border-[#1ed760]/20">
-                        {item.low} Low
-                      </span>
+                    <div>
+                      <h4 className="font-bold text-white">{item.month}</h4>
+                      <p className={`text-xs font-bold ${getSentimentColor(item.sentiment_score)}`}>
+                        Skor: {item.sentiment_score}%
+                      </p>
                     </div>
                   </div>
                   
-                  {/* Progress Bar */}
-                  <div className="w-full bg-[#282828] rounded-full h-3 overflow-hidden mt-1">
-                    <div className="flex h-full">
-                      <div
-                        className="bg-[#f3727f] h-full transition-all duration-500"
-                        style={{ width: `${item.total > 0 ? (item.urgent / item.total) * 100 : 0}%` }}
-                      />
-                      <div
-                        className="bg-[#ffa42b] h-full transition-all duration-500"
-                        style={{ width: `${item.total > 0 ? (item.normal / item.total) * 100 : 0}%` }}
-                      />
-                      <div
-                        className="bg-[#1ed760] h-full transition-all duration-500"
-                        style={{ width: `${item.total > 0 ? (item.low / item.total) * 100 : 0}%` }}
-                      />
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div className="px-3 py-1.5 rounded-lg bg-[#121212] border border-[#282828] text-center min-w-[80px]">
+                      <p className="text-[10px] text-[#b3b3b3] uppercase">Urgent</p>
+                      <p className="font-bold text-[#f3727f]">{item.urgent}</p>
                     </div>
-                  </div>
-                  
-                  <div className="flex justify-between text-xs text-[#b3b3b3] mt-2 font-mono">
-                    <span>Total: {item.total} tiket</span>
-                    <span>
-                      {item.sentiment_score >= 70
-                        ? "Suasana kampus kondusif"
-                        : item.sentiment_score >= 40
-                        ? "Ada beberapa keluhan"
-                        : "Banyak keluhan serius"}
-                    </span>
+                    <div className="px-3 py-1.5 rounded-lg bg-[#121212] border border-[#282828] text-center min-w-[80px]">
+                      <p className="text-[10px] text-[#b3b3b3] uppercase">Normal</p>
+                      <p className="font-bold text-[#ffa42b]">{item.normal}</p>
+                    </div>
+                    <div className="px-3 py-1.5 rounded-lg bg-[#121212] border border-[#282828] text-center min-w-[80px]">
+                      <p className="text-[10px] text-[#b3b3b3] uppercase">Low</p>
+                      <p className="font-bold text-[#1ed760]">{item.low}</p>
+                    </div>
+                    <div className="px-4 py-1.5 rounded-lg bg-[#1ed760]/10 border border-[#1ed760]/20 text-center min-w-[80px]">
+                      <p className="text-[10px] text-[#1ed760] uppercase">Total</p>
+                      <p className="font-bold text-[#1ed760]">{item.total}</p>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div className="mt-6 bg-[#181818] border border-[#282828] rounded-xl p-4">
-        <div className="flex items-center gap-6 text-sm flex-wrap">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-[#f3727f] rounded-sm" />
-            <span className="text-[#b3b3b3]">Urgent (Skor 0-33)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-[#ffa42b] rounded-sm" />
-            <span className="text-[#b3b3b3]">Normal (Skor 34-66)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-[#1ed760] rounded-sm" />
-            <span className="text-[#b3b3b3]">Low (Skor 67-100)</span>
-          </div>
         </div>
       </div>
     </div>
