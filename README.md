@@ -4,6 +4,12 @@ A modern, scalable helpdesk platform designed for academic institutions, integra
 
 ---
 
+## Preview
+
+![Preview System](./assets/preview1.png)
+
+---
+
 ## Overview
 
 UNSAP Helpdesk System is a full-stack web application that enables students to report issues and receive timely support from administrative staff. The platform leverages Natural Language Processing (NLP) to provide intelligent FAQ suggestions, classify ticket urgency, and analyze campus sentiment.
@@ -139,10 +145,13 @@ Backend API (Laravel)
 │   ├── app/Jobs/
 │   └── routes/api.php
 │
-└── ml-service/
-    ├── models/
-    ├── main.py
-    └── train.py
+├── ml-service/
+│   ├── models/
+│   ├── main.py
+│   └── train.py
+│
+└── assets/
+    └── preview1.png
 ```
 
 ---
