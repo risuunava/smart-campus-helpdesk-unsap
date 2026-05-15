@@ -59,9 +59,19 @@ export default function LoginPage() {
           </div>
 
           <div className="relative z-10">
-            <div className="mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#1ed760] to-[#1db954] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(30,215,96,0.3)]">
-                <GraduationCap className="h-7 w-7 text-black" />
+            <div className="mb-6 flex items-center gap-3">
+              <div className="w-11 h-11 flex items-center justify-center shrink-0">
+                <Image 
+                  src="/images/hd-logo.png" 
+                  alt="UNSAP Logo" 
+                  width={44} 
+                  height={44} 
+                  className="object-contain"
+                />
+              </div>
+              <div className="leading-tight">
+                <h1 className="font-bold text-white text-sm tracking-wide">UNSAP</h1>
+                <p className="text-[11px] text-white/60">Helpdesk</p>
               </div>
             </div>
 

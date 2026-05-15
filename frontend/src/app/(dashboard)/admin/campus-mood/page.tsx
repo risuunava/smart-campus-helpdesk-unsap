@@ -35,7 +35,7 @@ const sentimentChartConfig = {
 
 const ticketDistributionConfig = {
   low: {
-    label: "Low (Aman)",
+    label: "Low",
     color: "#1ed760",
   },
   normal: {
@@ -43,7 +43,7 @@ const ticketDistributionConfig = {
     color: "#ffa42b",
   },
   urgent: {
-    label: "Urgent (Kritis)",
+    label: "Urgent",
     color: "#f3727f",
   },
 } satisfies ChartConfig;

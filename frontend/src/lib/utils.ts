@@ -82,19 +82,16 @@ export function getPriorityColor(priority: "low" | "normal" | "urgent") {
       bg: "bg-red-500/15",
       text: "text-[#f3727f]",
       border: "border-red-500/25",
-      icon: "•",
     },
     normal: {
       bg: "bg-amber-500/15",
       text: "text-[#ffa42b]",
       border: "border-amber-500/25",
-      icon: "•",
     },
     low: {
       bg: "bg-[#b3b3b3]/10",
       text: "text-[#b3b3b3]",
       border: "border-[#b3b3b3]/20",
-      icon: "•",
     },
   };
 

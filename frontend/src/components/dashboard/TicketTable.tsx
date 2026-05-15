@@ -186,12 +186,12 @@ export function TicketTable() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${priorityColor.bg} ${priorityColor.text} border ${priorityColor.border}`}>
-                        {priorityColor.icon} {ticket.priority}
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold ${priorityColor.bg} ${priorityColor.text} border ${priorityColor.border} uppercase tracking-wider`}>
+                        {ticket.priority}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${statusColor.bg} ${statusColor.text} border ${statusColor.border}`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold ${statusColor.bg} ${statusColor.text} border ${statusColor.border}`}>
                         {statusColor.label}
                       </span>
                     </TableCell>
@@ -200,7 +200,7 @@ export function TicketTable() {
                     </TableCell>
                     <TableCell className="text-right">
                       <button
-                        className="p-2 rounded-full hover:bg-[#1ed760]/10 text-[#b3b3b3] hover:text-[#1ed760] transition-colors"
+                        className="p-2 rounded-lg bg-[#282828] text-[#b3b3b3] hover:text-[#1ed760] transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           router.push(`/admin/tiket/${ticket.id}`);
@@ -218,28 +218,26 @@ export function TicketTable() {
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-[#666666]">
-          Menampilkan {tickets.length} dari {total} tiket
+      <div className="flex items-center justify-between mt-6">
+        <p className="text-xs text-[#666666] font-medium uppercase tracking-widest">
+          {total} Tiket ditemukan
         </p>
         <div className="flex items-center gap-2">
           <button
-            className="px-4 py-2 rounded-full text-sm bg-[#1f1f1f] border border-[#4d4d4d] text-[#b3b3b3] hover:text-white hover:border-white transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
+            className="p-2 rounded-lg bg-[#181818] border border-[#333333] text-[#b3b3b3] hover:text-white transition-colors disabled:opacity-20 disabled:cursor-not-allowed flex items-center gap-1"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((p) => p - 1)}
           >
             <ChevronLeft className="h-4 w-4" />
-            Sebelumnya
           </button>
-          <span className="text-sm text-[#b3b3b3] px-3">
+          <span className="text-xs text-[#666666] font-bold px-2 uppercase tracking-widest">
             {currentPage} / {lastPage}
           </span>
           <button
-            className="px-4 py-2 rounded-full text-sm bg-[#1f1f1f] border border-[#4d4d4d] text-[#b3b3b3] hover:text-white hover:border-white transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
+            className="p-2 rounded-lg bg-[#181818] border border-[#333333] text-[#b3b3b3] hover:text-white transition-colors disabled:opacity-20 disabled:cursor-not-allowed flex items-center gap-1"
             disabled={currentPage === lastPage}
             onClick={() => setCurrentPage((p) => p + 1)}
           >
-            Selanjutnya
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>

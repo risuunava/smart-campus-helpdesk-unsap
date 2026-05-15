@@ -188,9 +188,8 @@ export default function MahasiswaDashboardPage() {
               <h3 className="text-white font-black text-xl leading-tight mb-1">Ada Masalah?</h3>
               <p className="text-[#b3b3b3] text-[11px] font-bold mb-5">Laporkan kendala fasilitas atau akademik segera.</p>
               <Link href="/mahasiswa/buat-laporan">
-                <button className="w-full bg-[#1ed760] text-black hover:bg-[#1ed760]/90 py-3.5 rounded-full text-[11px] font-black uppercase tracking-[2px] shadow-lg relative overflow-hidden group border-0">
-                  <div className="absolute inset-0 -translate-x-[150%] group-hover:translate-x-[150%] bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 ease-in-out" />
-                  <span className="relative z-10">Mulai Laporan</span>
+                <button className="btn-gradient animate-shine w-full py-3.5 px-6 text-[11px] font-black uppercase tracking-[2px] shadow-lg">
+                  Mulai Laporan
                 </button>
               </Link>
             </div>

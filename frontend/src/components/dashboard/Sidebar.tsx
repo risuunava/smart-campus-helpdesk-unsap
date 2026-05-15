@@ -170,12 +170,18 @@ export function Sidebar() {
           {/* Logo */}
           <div className="p-6 border-b border-[#282828]">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#1ed760] rounded-full flex items-center justify-center shadow-lg shadow-[#1ed760]/20">
-                <Shield className="h-5 w-5 text-black" />
+              <div className="w-10 h-10 flex items-center justify-center shrink-0">
+                <Image 
+                  src="/images/hd-logo.png" 
+                  alt="UNSAP Logo" 
+                  width={36} 
+                  height={36} 
+                  className="object-contain"
+                />
               </div>
-              <div>
+              <div className="leading-tight">
                 <h1 className="font-bold text-white text-sm tracking-wide">UNSAP</h1>
-                <p className="text-xs text-[#b3b3b3]">Helpdesk</p>
+                <p className="text-[11px] text-[#b3b3b3]">Helpdesk</p>
               </div>
             </Link>
           </div>

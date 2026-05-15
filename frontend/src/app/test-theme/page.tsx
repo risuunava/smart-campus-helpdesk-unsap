@@ -27,7 +27,7 @@ export default function TestThemePage() {
         {/* Color Palette */}
         <Card>
           <CardHeader>
-            <CardTitle>🎨 Color Palette UNSAP</CardTitle>
+            <CardTitle>Color Palette UNSAP</CardTitle>
             <CardDescription>Primary Brand Colors</CardDescription>
           </CardHeader>
           <CardContent>
@@ -45,20 +45,17 @@ export default function TestThemePage() {
         {/* Priority Badges */}
         <Card>
           <CardHeader>
-            <CardTitle>🏷️ Priority Badges</CardTitle>
+            <CardTitle>Priority Badges</CardTitle>
             <CardDescription>Visualisasi prioritas tiket</CardDescription>
           </CardHeader>
           <CardContent className="flex gap-4 flex-wrap">
             <Badge className="badge-urgent">
-              <AlertCircle className="mr-1 h-3 w-3" />
               Urgent
             </Badge>
             <Badge className="badge-normal">
-              <Clock className="mr-1 h-3 w-3" />
               Normal
             </Badge>
             <Badge className="badge-low">
-              <CheckCircle2 className="mr-1 h-3 w-3" />
               Low
             </Badge>
           </CardContent>
@@ -67,7 +64,7 @@ export default function TestThemePage() {
         {/* Status Badges */}
         <Card>
           <CardHeader>
-            <CardTitle>📊 Status Badges</CardTitle>
+            <CardTitle>Status Badges</CardTitle>
             <CardDescription>Status tiket</CardDescription>
           </CardHeader>
           <CardContent className="flex gap-4 flex-wrap">
@@ -123,7 +120,7 @@ export default function TestThemePage() {
         {/* Loading Skeleton */}
         <Card>
           <CardHeader>
-            <CardTitle>⏳ Skeleton Loading</CardTitle>
+            <CardTitle>Skeleton Loading</CardTitle>
             <CardDescription>Placeholder loading state</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -137,7 +134,7 @@ export default function TestThemePage() {
         {/* Gradient Buttons */}
         <Card>
           <CardHeader>
-            <CardTitle>🔘 Buttons</CardTitle>
+            <CardTitle>Buttons</CardTitle>
             <CardDescription>Variasi tombol</CardDescription>
           </CardHeader>
           <CardContent className="flex gap-4 flex-wrap">

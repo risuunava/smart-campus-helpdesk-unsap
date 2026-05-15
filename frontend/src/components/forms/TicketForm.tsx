@@ -145,19 +145,13 @@ export function TicketForm() {
 
   return (
     <>
-      <Card className="bg-[#181818] border border-[#282828] rounded-2xl max-w-2xl mx-auto" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+      <Card className="bg-[#181818] border border-[#282828] rounded-2xl max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-white">
-            Buat Laporan Baru
+          <CardTitle className="text-xl font-bold text-white">
+            Formulir Laporan
           </CardTitle>
           <CardDescription className="text-[#b3b3b3]">
-            Isi form di bawah untuk melaporkan keluhan atau masalah yang Anda alami.
-            {isCheckingFAQ && (
-              <span className="flex items-center gap-2 mt-2 text-[#1ed760]">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Mencari solusi terkait...
-              </span>
-            )}
+            Silakan lengkapi detail laporan Anda di bawah ini.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -300,7 +294,7 @@ export function TicketForm() {
               <div className="flex gap-4">
                 <Button
                   type="submit"
-                  className="btn-gradient flex-1"
+                  className="btn-gradient animate-shine flex-1"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -339,10 +333,10 @@ export function TicketForm() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-[#1ed760]">
               <Lightbulb className="h-5 w-5" />
-              Solusi Instan Ditemukan!
+              Saran FAQ Terkait
             </DialogTitle>
             <DialogDescription className="text-[#b3b3b3]">
-              Kami menemukan FAQ yang mungkin bisa membantu menyelesaikan masalah Anda tanpa perlu membuat laporan.
+              Berikut adalah beberapa informasi yang mungkin dapat membantu menyelesaikan kendala Anda.
             </DialogDescription>
           </DialogHeader>
           
