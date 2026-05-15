@@ -8,6 +8,7 @@ import numpy as np
 import joblib
 import os
 import sys
+import requests
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import SVC
@@ -241,6 +242,9 @@ class PriorityClassifier:
         # Save models
         self.save_models()
         
+        # ✅ Otomatis reload model ke service yang sedang berjalan
+        self._notify_service_reload()
+        
         logger.info("\n" + "=" * 60)
         logger.info("✅ TRAINING COMPLETE!")
         logger.info(f"🏆 Best Model: {results['model_name']}")
@@ -249,6 +253,29 @@ class PriorityClassifier:
         logger.info("=" * 60)
         
         return results
+    
+    def _notify_service_reload(self, service_url: str = "http://localhost:5000"):
+        """
+        Memberitahu ML service yang sedang berjalan untuk reload model dari disk.
+        Jika service tidak berjalan, cukup log warning dan lanjutkan.
+        """
+        try:
+            logger.info(f"🔔 Menghubungi ML service di {service_url}/api/reload-models ...")
+            response = requests.post(
+                f"{service_url}/api/reload-models",
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                logger.info(f"✅ ML Service berhasil reload model: {data.get('message', '')}")
+            else:
+                logger.warning(f"⚠️ Service merespons dengan status {response.status_code}: {response.text}")
+        except requests.exceptions.ConnectionError:
+            logger.warning("⚠️ ML Service tidak sedang berjalan. Model baru akan dipakai saat service berikutnya distart.")
+        except requests.exceptions.Timeout:
+            logger.warning("⚠️ ML Service timeout saat reload. Restart service secara manual jika diperlukan.")
+        except Exception as e:
+            logger.warning(f"⚠️ Gagal menghubungi service untuk reload: {str(e)}")
 
 
 def main():

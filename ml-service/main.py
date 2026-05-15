@@ -252,6 +252,20 @@ async def classify_priority(request: ClassifyRequest):
         # Vectorize
         text_vector = vectorizer.transform([processed_text])
         
+        # Jika semua kata tidak dikenali (vector kosong), kembalikan 'normal' sebagai default
+        # Ini mencegah model yang bias ke kelas mayoritas (urgent) saat input tidak relevan
+        if text_vector.nnz == 0:
+            logger.warning(f"⚠️ Tidak ada kata yang dikenali dalam: '{request.text[:50]}'. Fallback ke 'normal'.")
+            processing_time = (datetime.now() - start_time).total_seconds() * 1000
+            return ClassifyResponse(
+                priority="normal",
+                confidence_score=0.0,
+                probabilities={"low": 0.0, "normal": 1.0, "urgent": 0.0},
+                model_version=f"v1.0-fallback-unknown-words",
+                processed_at=datetime.now().isoformat(),
+                processing_time_ms=round(processing_time, 2),
+            )
+        
         # Predict
         prediction = classifier.predict(text_vector)[0]
         prediction_label = label_encoder.inverse_transform([prediction])[0] if label_encoder else prediction
@@ -349,6 +363,50 @@ async def faq_similarity(request: SimilarityRequest):
         raise HTTPException(status_code=500, detail=f"Similarity check failed: {str(e)}")
 
 
+@app.post("/api/reload-models")
+async def reload_models():
+    """
+    Reload model dari disk ke memori tanpa restart server.
+    Dipanggil otomatis setelah train.py selesai.
+    """
+    global classifier, vectorizer, label_encoder, faq_vectors, model_info
+    
+    try:
+        if not model_loader.models_exist():
+            raise HTTPException(status_code=404, detail="Model files not found. Run training first.")
+        
+        logger.info("🔄 Reloading models from disk...")
+        classifier, vectorizer, label_encoder = model_loader.load_models()
+        
+        # Update model info
+        model_info["status"] = "loaded"
+        model_info["loaded_at"] = datetime.now().isoformat()
+        model_info["classifier_type"] = type(classifier).__name__
+        model_info["feature_count"] = vectorizer.get_feature_names_out().shape[0]
+        model_info["labels"] = list(label_encoder.classes_) if label_encoder else []
+        
+        # Re-vectorize FAQ data with new vectorizer
+        if faq_df is not None:
+            faq_vectors = vectorizer.transform(faq_df['processed'])
+            logger.info(f"✅ FAQ vectors rebuilt: {len(faq_df)} items")
+        
+        logger.info(f"✅ Models reloaded successfully")
+        logger.info(f"   - Classifier: {model_info['classifier_type']}")
+        logger.info(f"   - Features: {model_info['feature_count']}")
+        
+        return {
+            "success": True,
+            "message": "Models reloaded successfully from disk",
+            "model_info": model_info,
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Reload error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Model reload failed: {str(e)}")
+
+
 @app.post("/api/retrain")
 async def retrain_model(request: TrainRequest, background_tasks: BackgroundTasks):
     """
@@ -365,13 +423,12 @@ async def retrain_model(request: TrainRequest, background_tasks: BackgroundTasks
             trainer = PriorityClassifier()
             results = trainer.run(dataset_path)
             
-            # Reload models
-            global classifier, vectorizer, label_encoder
-            classifier, vectorizer, label_encoder = model_loader.load_models()
+            # Reload models into memory
+            await reload_models()
             
             return {
                 "success": True,
-                "message": "Model retrained successfully",
+                "message": "Model retrained and reloaded successfully",
                 "results": results,
             }
         else:

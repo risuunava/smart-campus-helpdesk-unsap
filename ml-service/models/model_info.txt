@@ -1,4 +1,4 @@
-Model trained on: 2026-05-09 20:13:54.357659
-Vectorizer features: 35
-Classifier: MultinomialNB
+Model trained on: 2026-05-15 13:51:33.872856
+Vectorizer features: 263
+Classifier: LogisticRegression
 Labels: ['low', 'normal', 'urgent']
