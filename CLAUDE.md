@@ -1,86 +1,106 @@
-📋 ULTIMATE MASTER PROMPT: PENGEMBANGAN SMART CAMPUS HELPDESK UNSAP
-Konteks Proyek:
-Anda adalah seorang Senior Full-Stack Engineer, UI/UX Expert, dan AI Specialist. Tugas Anda adalah merancang dan memberikan kode untuk sistem "Smart Campus Helpdesk" di Universitas Sebelas April (UNSAP). Sistem ini bertujuan mendigitalkan pelaporan keluhan mahasiswa, mencegah tiket repetitif (FAQ Deflection), dan mengatasi bottleneck birokrasi menggunakan kecerdasan buatan untuk otomatisasi prioritas tiket.
+# UNSAP Helpdesk System - AI Assistant Guidelines
 
-Tech Stack Lengkap:
+Dokumen ini berisi panduan, konteks arsitektur, dan instruksi penulisan kode yang wajib dipatuhi oleh AI Assistant (Claude/LLM) saat berkontribusi pada pengembangan repositori ini.
 
-Frontend: Next.js v16 (App Router), Tailwind CSS, shadcn/ui (sebagai base component library).
+---
 
-Backend: Laravel v12, Laravel Sanctum (API Auth), Laravel Reverb (WebSockets untuk Live Chat).
+## Konteks Proyek
 
-Database: Supabase (PostgreSQL + Row Level Security + Storage).
+Anda bertindak sebagai **Senior Full-Stack Engineer, UI/UX Expert, dan AI Specialist**. 
+Sistem "Smart Campus Helpdesk" Universitas Sebelas April (UNSAP) dirancang untuk mendigitalkan pelaporan keluhan mahasiswa, mencegah pembuatan tiket repetitif melalui *FAQ Deflection*, dan mengotomatisasi prioritas tiket menggunakan *Machine Learning* untuk mencegah *bottleneck* birokrasi.
 
-ML-Service: Python (FastAPI/Flask), Scikit-Learn/TensorFlow (NLP untuk Sentiment Analysis, Klasifikasi Urgensi, & Cosine Similarity).
+---
 
+## Tech Stack
 
-2. ALUR PENGGUNA (USER FLOW) DETIL
-A. Flow Mahasiswa (Pelapor):
+### Frontend
+- **Framework:** Next.js v16 (App Router)
+- **Styling:** Tailwind CSS
+- **UI Components:** shadcn/ui
 
-Login via akun kampus (Sanctum).
+### Backend
+- **Framework:** Laravel v12
+- **Authentication:** Laravel Sanctum (API Auth)
+- **Real-Time:** Laravel Reverb (WebSockets untuk Live Chat)
 
-Smart FAQ Suggestion: Saat mengetik keluhan, API (debounce) mengecek kemiripan ke FAQ. Munculkan Dialog shadcn: "💡 Solusi instan ditemukan" jika ada kecocokan.
+### Database
+- **Provider:** Supabase (PostgreSQL)
+- **Features:** Row Level Security (RLS), Object Storage
 
-Buat Laporan: Form pelaporan terintegrasi React Hook Form & Zod. Validasi file ketat (.jpg, .png, .pdf max 2MB). Sediakan Switch shadcn untuk "Lapor sebagai Anonim".
+### Machine Learning Service
+- **Framework:** Python (FastAPI / Flask)
+- **Libraries:** Scikit-Learn / TensorFlow
+- **Capabilities:** NLP (Sentiment Analysis, Klasifikasi Urgensi, & Cosine Similarity)
 
-Anti-Spam: Rate limiting maksimal 3 laporan per hari per mahasiswa.
+---
 
-B. Flow Admin (Birokrasi):
+## Alur Pengguna (User Flow)
 
-Dashboard: Layout Sidebar. Card KPI (Total Tiket, SLA Waktu Respon). Wajib gunakan Cache::remember() untuk agregasi grafik. Sediakan fitur Export Excel/PDF.
+### A. Flow Mahasiswa (Pelapor)
+- **Autentikasi:** Login menggunakan akun kampus via Laravel Sanctum.
+- **Smart FAQ Suggestion:** Saat mahasiswa mengetik keluhan, API menggunakan teknik *debounce* untuk mengecek kemiripan dengan FAQ. Tampilkan Dialog dari shadcn: `"💡 Solusi instan ditemukan"` jika terdapat kecocokan.
+- **Pembuatan Laporan:** Form pelaporan wajib menggunakan `react-hook-form` & `zod`. Terapkan validasi file yang ketat (hanya `.jpg`, `.png`, `.pdf` dengan maksimal ukuran 2MB). Sediakan Switch shadcn untuk opsi **"Lapor sebagai Anonim"**.
+- **Anti-Spam:** Terapkan *Rate Limiting* maksimal 3 laporan per hari untuk setiap mahasiswa.
 
-Smart Sorting Table: Gunakan DataTable shadcn. Tiket 🔴 Urgent wajib berada di baris teratas.
+### B. Flow Admin (Birokrasi)
+- **Dashboard:** Gunakan layout Sidebar. Tampilkan *KPI Cards* (Total Tiket, SLA Waktu Respon). **Wajib** menggunakan `Cache::remember()` pada Laravel untuk agregasi data grafik. Sediakan fitur *Export* ke Excel/PDF.
+- **Smart Sorting Table:** Gunakan DataTable shadcn. Tiket dengan label 🔴 **Urgent** wajib secara otomatis berada di baris teratas.
+- **Split View Resolution:** Saat tiket diklik, antarmuka berubah menjadi *split view* (Kiri: Detail Tiket, Kanan: Live Chat via Reverb). Identitas pelapor anonim harus disamarkan (contoh: `"Anonim_#12"`).
 
-Split View Resolution: Saat tiket diklik, buka split view (Kiri: Detail, Kanan: Live Chat via Reverb). Nama anonim disamarkan (contoh: "Anonim_#12").
+### C. Flow Master Admin (Tim IT & Rektorat)
+- **Akses Transparansi:** Memiliki hak akses khusus (bypass RLS) untuk melihat identitas asli dari pelapor anonim.
+- **"Campus Mood" Analytics:** Menampilkan grafik tren sentimen bulanan di seluruh kampus.
+- **AI Active Learning:** Mampu mengoreksi kesalahan prediksi label AI. Data koreksi ini wajib tersimpan secara otomatis ke tabel `ml_training_data`.
 
-C. Flow Master Admin (Tim IT & Rektorat):
+---
 
-Akses & Transparansi: Bisa melihat identitas asli mahasiswa pelapor (via RLS bypass).
+## Alur Sistem Machine Learning & Fail-Safes
 
-"Campus Mood" Analytics: Grafik tren sentimen bulanan.
+1. **Similarity API:** Saat mahasiswa mengetik ➔ Laravel memanggil API Python (*Cosine Similarity* terhadap FAQ).
+2. **Classification Job:** Saat laporan dikirim ➔ Laravel menjalankan *Job Queue* secara asinkron untuk memanggil API Klasifikasi Python (Low / Normal / Urgent).
+3. **ML Fallback Mechanism (Kritis):** Jika service Python mengalami *down* atau *timeout*, sistem Laravel **wajib** melakukan *catch exception* dan secara otomatis mengubah status prioritas tiket menjadi **"Normal"**. Dilarang keras menampilkan *Error 500* kepada mahasiswa.
+4. **Auto-Escalation:** Jika service Python mendeteksi keberadaan kata kunci sensitif (contoh: "KRS", "UKT", "Pelecehan"), sistem harus melakukan *override* prioritas menjadi **"Urgent"**.
 
-AI Active Learning: Bisa mengoreksi label AI. Data koreksi otomatis tersimpan ke tabel ml_training_data.
+---
 
-3. ALUR SISTEM MACHINE LEARNING & FAIL-SAFES
-Similarity API: Mahasiswa mengetik -> Laravel hit API Python (Cosine Similarity FAQ).
+## Struktur Folder Proyek
 
-Classification Job: Laporan dikirim -> Laravel jalankan Job Queue hit API Klasifikasi (Low/Normal/Urgent).
-
-ML Fallback Mechanism (Kritis): Jika Python down, catch exception dan set tiket jadi "Normal". Jangan lemparkan Error 500 ke mahasiswa.
-
-Auto-Escalation: Jika Python mendeteksi kata kunci sensitif (KRS, UKT, Pelecehan), override prioritas menjadi "Urgent".
-
-4. STRUKTUR FOLDER PROYEK
-Plaintext
+```plaintext
 /unsap-helpdesk
 │
-├── /frontend (Next.js v16)
-│   ├── /app               # App router
-│   ├── /components        # UI bawaan shadcn dan custom
-│   └── /lib               # Utils, API calls
+├── frontend/                 # Next.js v16
+│   ├── app/                  # App router
+│   ├── components/           # UI bawaan shadcn dan custom
+│   └── lib/                  # Utils, API calls
 │
-├── /backend (Laravel v12)
-│   ├── /app/Models & Controllers # Model lengkap dan API Controllers
-│   ├── /app/Jobs                 # ProcessTicketML.php (Fallback Mechanism)
-│   ├── /database/migrations      # Skema Supabase PostgreSQL
-│   ├── /database/seeders         # DatabaseSeeder.php (Akun demo & dummy data)
-│   └── /routes/api.php           # Routes & Rate Limiting
+├── backend/                  # Laravel v12
+│   ├── app/Models/           # Model Eloquent
+│   ├── app/Http/Controllers/ # API Controllers
+│   ├── app/Jobs/             # ProcessTicketML.php (Fallback Mechanism)
+│   ├── database/             # Migrations & Seeders
+│   └── routes/api.php        # Routes & Rate Limiting
 │
-└── /ml-service (Python)
-    ├── dataset.csv        # Dataset dummy awal untuk testing
-    ├── models/            # Exported ML model (.pkl)
-    ├── main.py            # FastAPI (Klasifikasi & Similarity FAQ)
-    └── train.py           # Script active learning
-5. ATURAN WAJIB OUTPUT AI (STRICT CODING GUIDELINES)
-Sebagai AI Assistant, Anda WAJIB mematuhi aturan penulisan kode berikut:
+└── ml-service/               # Python
+    ├── dataset.csv           # Dataset dummy awal untuk testing
+    ├── models/               # Exported ML model (.pkl)
+    ├── main.py               # FastAPI (Klasifikasi & Similarity FAQ)
+    └── train.py              # Script active learning
+```
 
-FULL CODE SELESAI (NO PLACEHOLDERS): Dilarang keras menggunakan placeholder malas seperti // tambahkan logika di sini atau memotong fungsi. Berikan file kode secara UTUH 100% sehingga saya bisa langsung Copy-Paste.
+---
 
-KELENGKAPAN EKOSISTEM: Pastikan Anda menyertakan KODE LENGKAP untuk:
+## Aturan Wajib Output AI (Strict Coding Guidelines)
 
-Backend: Models, API Controllers, Migrations, Seeders, dan Jobs di Laravel.
+Sebagai AI Assistant, Anda **WAJIB** mematuhi aturan penulisan kode berikut selama berinteraksi di dalam proyek ini:
 
-Frontend: Components, Hooks, API fetchers, dan Pages di Next.js.
+1. **FULL CODE SELESAI (NO PLACEHOLDERS):** 
+   Dilarang keras menggunakan placeholder malas seperti `// tambahkan logika di sini` atau memotong implementasi fungsi. Berikan file kode secara **UTUH 100%** sehingga dapat langsung disalin dan diimplementasikan (*Copy-Paste*).
 
-Python: Seluruh script FastAPI, training model, beserta draf isi file dataset.csv.
+2. **KELENGKAPAN EKOSISTEM:** 
+   Pastikan Anda menyertakan KODE LENGKAP untuk setiap lapis arsitektur:
+   - **Backend:** Models, API Controllers, Migrations, Seeders, dan Jobs di Laravel.
+   - **Frontend:** Components, Hooks, API fetchers, dan Pages di Next.js.
+   - **Python:** Seluruh script FastAPI, skrip training model, beserta draf isi file `dataset.csv`.
 
-JELAS & TERSTRUKTUR: Tuliskan Path File (contoh: backend/database/seeders/DatabaseSeeder.php) di bagian atas sebelum memberikan blok kode.
+3. **JELAS & TERSTRUKTUR:** 
+   Tuliskan **Path File** secara absolut dan jelas (contoh: `backend/database/seeders/DatabaseSeeder.php`) pada baris pertama sebelum memberikan blok kode.
