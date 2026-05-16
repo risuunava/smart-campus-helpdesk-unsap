@@ -6,8 +6,6 @@ A modern, scalable helpdesk platform designed for academic institutions, integra
 
 ## Preview
 
-## Preview
-
 <p align="center">
   <img src="./assets/preview1.png" width="90%" />
 </p>
@@ -25,7 +23,6 @@ A modern, scalable helpdesk platform designed for academic institutions, integra
   <img src="./assets/dashboard.png" width="45%" />
   <img src="./assets/table.png" width="45%" />
 </p>
----
 
 ## Overview
 
