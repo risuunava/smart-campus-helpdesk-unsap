@@ -132,7 +132,7 @@ export default function TicketDetailMahasiswaPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#121212]">
         <Loader2 className="h-8 w-8 animate-spin text-[#1ed760]" />
       </div>
     );
@@ -167,7 +167,7 @@ export default function TicketDetailMahasiswaPage() {
           <div className="flex items-center gap-3 mt-2">
             <span className="font-mono text-sm text-[#666666]">{ticket.ticket_code}</span>
             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${priorityColor.bg} ${priorityColor.text} ${priorityColor.border}`}>
-              {priorityColor.icon} {ticket.priority === "urgent" ? "URGENT" : ticket.priority === "normal" ? "NORMAL" : "LOW"}
+              {ticket.priority === "urgent" ? "URGENT" : ticket.priority === "normal" ? "NORMAL" : "LOW"}
             </span>
             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor.bg} ${statusColor.text} ${statusColor.border}`}>
               {statusColor.label}

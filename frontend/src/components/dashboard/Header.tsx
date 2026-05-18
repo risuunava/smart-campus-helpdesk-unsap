@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useSidebar } from "@/hooks/useSidebar";
 import { Notification, NotificationType } from "@/types";
 import { 
   Bell, 
@@ -108,6 +109,7 @@ export function Header() {
     markAllRead,
     deleteNotification,
   } = useNotifications();
+  const { isCollapsed } = useSidebar();
 
   if (!user) return null;
 
@@ -115,7 +117,7 @@ export function Header() {
   const preview = notifications.slice(0, 6);
 
   return (
-    <header className="fixed top-0 left-0 lg:left-64 right-0 h-16 bg-[#121212]/80 backdrop-blur-md border-b border-[#282828] z-40 px-4 md:px-8 flex items-center justify-end">
+    <header className={`fixed top-0 left-0 ${isCollapsed ? 'lg:left-20' : 'lg:left-64'} right-0 h-16 bg-[#121212]/80 backdrop-blur-md border-b border-[#282828] z-40 px-4 md:px-8 flex items-center justify-end transition-all duration-300 ease-in-out`}>
       <div className="flex items-center gap-3">
 
         {/* ── Bell Dropdown ─────────────────────────────────────── */}

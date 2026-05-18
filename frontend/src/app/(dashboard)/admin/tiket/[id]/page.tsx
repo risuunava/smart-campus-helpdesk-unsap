@@ -109,7 +109,7 @@ export default function TicketDetailAdminPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#121212]">
         <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
       </div>
     );
@@ -143,7 +143,7 @@ export default function TicketDetailAdminPage() {
           </h1>
         </div>
         <span className={`px-3 py-1 rounded-full text-sm font-semibold ${priorityColor.bg} ${priorityColor.text} border ${priorityColor.border}`}>
-          {priorityColor.icon} {ticket.priority}
+          {ticket.priority}
         </span>
         <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusColor.bg} ${statusColor.text} border ${statusColor.border}`}>
           {statusColor.label}

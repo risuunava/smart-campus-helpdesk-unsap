@@ -62,7 +62,7 @@ export default function MahasiswaDashboardPage() {
 
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#121212]">
         <Loader2 className="h-8 w-8 animate-spin text-[#1ed760]" />
       </div>
     );

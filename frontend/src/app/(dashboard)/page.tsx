@@ -37,7 +37,7 @@ export default function DashboardPage() {
   }, [user, isAuthenticated, isLoading, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#121212]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#121212]">
       <div className="text-center space-y-4">
         <div className="mx-auto w-16 h-16 bg-[#1ed760] rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-[#1ed760]/20">
           <Loader2 className="h-8 w-8 text-black animate-spin" />
