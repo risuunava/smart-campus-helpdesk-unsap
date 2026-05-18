@@ -19,7 +19,11 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => array_filter([
+        env('FRONTEND_URL'),           // URL Vercel production (Tahap 4)
+        'http://localhost:3000',       // Development lokal Next.js
+        'http://127.0.0.1:3000',       // Development lokal alternatif
+    ]),
 
     'allowed_origins_patterns' => [],
 
