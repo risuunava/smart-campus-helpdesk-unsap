@@ -54,7 +54,14 @@ class Ticket extends Model
         // Gunakan Supabase Storage jika dikonfigurasi (production)
         // Format URL publik Supabase: {SUPABASE_URL}/storage/v1/object/public/{bucket}/{path}
         if (config('filesystems.disks.supabase.endpoint')) {
-            $supabaseUrl = rtrim(config('filesystems.disks.supabase.url'), '/');
+            $url = config('filesystems.disks.supabase.url');
+            if (!$url) {
+                // Fallback jika SUPABASE_STORAGE_URL tidak diset di .env
+                $endpoint = config('filesystems.disks.supabase.endpoint');
+                $url = str_replace('.storage.supabase.co/storage/v1/s3', '.supabase.co/storage/v1', $endpoint);
+            }
+            
+            $supabaseUrl = rtrim($url, '/');
             $bucket = config('filesystems.disks.supabase.bucket', 'attachments');
             $path = ltrim($this->attachment_path, '/');
             return "{$supabaseUrl}/object/public/{$bucket}/{$path}";
