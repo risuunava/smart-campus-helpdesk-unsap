@@ -251,28 +251,46 @@ class AuthController extends Controller
 
         $disk = config('filesystems.disks.supabase.endpoint') ? 'supabase' : 'public';
 
-        // Hapus avatar lama jika ada
-        if ($user->avatar && \Illuminate\Support\Facades\Storage::disk($disk)->exists($user->avatar)) {
-            \Illuminate\Support\Facades\Storage::disk($disk)->delete($user->avatar);
+        try {
+            // Hapus avatar lama jika ada
+            if ($user->avatar) {
+                try {
+                    if (\Illuminate\Support\Facades\Storage::disk($disk)->exists($user->avatar)) {
+                        \Illuminate\Support\Facades\Storage::disk($disk)->delete($user->avatar);
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Gagal menghapus avatar lama: ' . $e->getMessage());
+                }
+            }
+
+            $path = $request->file('avatar')->store('avatars', $disk);
+            
+            if (!$path) {
+                throw new \Exception('Gagal menyimpan file ke storage.');
+            }
+            
+            $user->avatar = $path;
+            $user->save();
+
+            // Kirim notifikasi foto profil berubah
+            Notification::send(
+                $user->id,
+                'avatar_updated',
+                'Foto Profil Diperbarui',
+                'Foto profil Anda berhasil diperbarui.'
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => $user,
+                'message' => 'Foto profil berhasil diperbarui',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error updating avatar: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui foto profil: ' . $e->getMessage()
+            ], 500);
         }
-
-        $path = $request->file('avatar')->store('avatars', $disk);
-        
-        $user->avatar = $path;
-        $user->save();
-
-        // Kirim notifikasi foto profil berubah
-        Notification::send(
-            $user->id,
-            'avatar_updated',
-            'Foto Profil Diperbarui',
-            'Foto profil Anda berhasil diperbarui.'
-        );
-
-        return response()->json([
-            'success' => true,
-            'data' => $user,
-            'message' => 'Foto profil berhasil diperbarui',
-        ]);
     }
 }
