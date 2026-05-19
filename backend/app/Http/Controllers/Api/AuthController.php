@@ -249,12 +249,14 @@ class AuthController extends Controller
 
         $user = $request->user();
 
+        $disk = config('filesystems.disks.supabase.endpoint') ? 'supabase' : 'public';
+
         // Hapus avatar lama jika ada
-        if ($user->avatar && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->avatar)) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+        if ($user->avatar && \Illuminate\Support\Facades\Storage::disk($disk)->exists($user->avatar)) {
+            \Illuminate\Support\Facades\Storage::disk($disk)->delete($user->avatar);
         }
 
-        $path = $request->file('avatar')->store('avatars', 'public');
+        $path = $request->file('avatar')->store('avatars', $disk);
         
         $user->avatar = $path;
         $user->save();

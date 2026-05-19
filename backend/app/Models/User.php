@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -41,7 +42,17 @@ class User extends Authenticatable
 
     public function getAvatarUrlAttribute(): ?string
     {
-        return $this->avatar ? url('storage/' . $this->avatar) : null;
+        if (!$this->avatar) {
+            return null;
+        }
+
+        // Gunakan Supabase Storage jika dikonfigurasi (production)
+        if (config('filesystems.disks.supabase.endpoint')) {
+            return Storage::disk('supabase')->url($this->avatar);
+        }
+
+        // Fallback ke local storage (development) - pastikan HTTPS
+        return Storage::disk('public')->url($this->avatar);
     }
 
     // Helper methods untuk cek role
