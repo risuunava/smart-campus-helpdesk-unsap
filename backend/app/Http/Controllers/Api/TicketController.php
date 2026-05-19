@@ -169,7 +169,8 @@ class TicketController extends Controller
             if ($request->hasFile('attachment')) {
                 $file = $request->file('attachment');
                 $attachmentType = $file->getClientOriginalExtension();
-                $attachmentPath = $file->store('tickets/' . date('Y/m'), 'public');
+                $disk = config('filesystems.disks.supabase.endpoint') ? 'supabase' : 'public';
+                $attachmentPath = $file->store('tickets/' . date('Y/m'), $disk);
             }
             
             // Buat tiket
@@ -444,13 +445,15 @@ class TicketController extends Controller
         }
 
         try {
-            if ($ticket->attachment_path && Storage::disk('public')->exists($ticket->attachment_path)) {
-                Storage::disk('public')->delete($ticket->attachment_path);
+            $disk = config('filesystems.disks.supabase.endpoint') ? 'supabase' : 'public';
+
+            if ($ticket->attachment_path && Storage::disk($disk)->exists($ticket->attachment_path)) {
+                Storage::disk($disk)->delete($ticket->attachment_path);
             }
 
             $file = $request->file('attachment');
             $attachmentType = $file->getClientOriginalExtension();
-            $attachmentPath = $file->store('tickets/' . date('Y/m'), 'public');
+            $attachmentPath = $file->store('tickets/' . date('Y/m'), $disk);
 
             $ticket->attachment_path = $attachmentPath;
             $ticket->attachment_type = $attachmentType;
@@ -489,8 +492,10 @@ class TicketController extends Controller
         }
 
         try {
-            if ($ticket->attachment_path && Storage::disk('public')->exists($ticket->attachment_path)) {
-                Storage::disk('public')->delete($ticket->attachment_path);
+            $disk = config('filesystems.disks.supabase.endpoint') ? 'supabase' : 'public';
+
+            if ($ticket->attachment_path && Storage::disk($disk)->exists($ticket->attachment_path)) {
+                Storage::disk($disk)->delete($ticket->attachment_path);
             }
 
             $ticket->attachment_path = null;

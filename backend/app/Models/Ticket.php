@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Ticket extends Model
 {
@@ -46,10 +47,17 @@ class Ticket extends Model
 
     public function getAttachmentUrlAttribute(): ?string
     {
-        if ($this->attachment_path) {
-            return asset('storage/' . $this->attachment_path);
+        if (!$this->attachment_path) {
+            return null;
         }
-        return null;
+
+        // Gunakan Supabase Storage jika dikonfigurasi (production)
+        if (config('filesystems.disks.supabase.endpoint')) {
+            return Storage::disk('supabase')->url($this->attachment_path);
+        }
+
+        // Fallback ke local storage (development)
+        return Storage::disk('public')->url($this->attachment_path);
     }
 
     // Relationship: User yang membuat tiket
