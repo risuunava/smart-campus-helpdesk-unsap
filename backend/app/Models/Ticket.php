@@ -31,6 +31,8 @@ class Ticket extends Model
         'resolution_note',
         'ml_confidence_score',
         'ml_metadata',
+        'rating',
+        'rating_comment',
     ];
 
     protected $casts = [

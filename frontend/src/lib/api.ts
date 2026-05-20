@@ -267,6 +267,16 @@ class ApiClient {
     });
   }
 
+  async rateTicket(
+    id: number,
+    data: { rating: number; rating_comment?: string }
+  ): Promise<{ success: boolean; data: Ticket; message: string }> {
+    return this.request(`/tickets/${id}/rate`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
   async correctMLLabel(
     ticketId: number,
     correctPriority: string,

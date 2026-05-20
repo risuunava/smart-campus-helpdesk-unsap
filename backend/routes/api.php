@@ -61,6 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/tickets/{id}', [TicketController::class, 'update']);
     Route::post('/tickets/{id}/attachment', [TicketController::class, 'updateAttachment']);
     Route::delete('/tickets/{id}/attachment', [TicketController::class, 'deleteAttachment']);
+    Route::post('/tickets/{id}/rate', [TicketController::class, 'rate']);
     
     // ML Correction (Master Admin only)
     Route::post('/tickets/{id}/correct-ml', [TicketController::class, 'correctMlLabel']);

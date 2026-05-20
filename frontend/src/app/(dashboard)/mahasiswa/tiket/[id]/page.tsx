@@ -27,7 +27,8 @@ import {
   Download,
   Trash2,
   Upload,
-  Edit2
+  Edit2,
+  Star
 } from "lucide-react";
 
 export default function TicketDetailMahasiswaPage() {
@@ -43,6 +44,12 @@ export default function TicketDetailMahasiswaPage() {
   const [isUpdatingAttachment, setIsUpdatingAttachment] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  
+  // Rating states
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -127,6 +134,24 @@ export default function TicketDetailMahasiswaPage() {
       toast.error(error.message || "Gagal menghapus lampiran");
     } finally {
       setIsUpdatingAttachment(false);
+    }
+  }
+
+  async function handleSubmitRating() {
+    if (rating === 0 || !id) return;
+    
+    setIsSubmittingRating(true);
+    try {
+      const response = await api.rateTicket(Number(id), {
+        rating,
+        rating_comment: comment,
+      });
+      setTicket(response.data);
+      toast.success("Terima kasih atas penilaian Anda!");
+    } catch (error: any) {
+      toast.error(error.message || "Gagal mengirim rating");
+    } finally {
+      setIsSubmittingRating(false);
     }
   }
 
@@ -235,6 +260,83 @@ export default function TicketDetailMahasiswaPage() {
                   </p>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Rating Section (resolved/closed) */}
+          {(ticket.status === "resolved" || ticket.status === "closed") && (
+            <div className="bg-[#181818] border border-[#282828] rounded-xl p-6">
+              {ticket.rating ? (
+                <div>
+                  <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                    <Star className="h-5 w-5 text-[#1ed760] fill-[#1ed760]" />
+                    Feedback Anda
+                  </h3>
+                  <div className="flex items-center gap-1 mb-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-5 w-5 ${
+                          star <= (ticket.rating ?? 0)
+                            ? "fill-[#1ed760] text-[#1ed760]"
+                            : "text-[#4d4d4d]"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  {ticket.rating_comment && (
+                    <p className="text-[#b3b3b3] text-sm italic mt-2 bg-[#1f1f1f] p-3 rounded-lg border border-[#282828]">
+                      "{ticket.rating_comment}"
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <h3 className="text-lg font-bold text-white mb-2">Berikan Rating Layanan</h3>
+                  <p className="text-sm text-[#b3b3b3] mb-4">Bagaimana penilaian Anda terhadap penanganan tiket ini?</p>
+                  
+                  {/* Stars */}
+                  <div className="flex items-center gap-2 mb-4">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className="focus:outline-none transition-transform active:scale-95"
+                      >
+                        <Star
+                          className={`h-8 w-8 transition-colors ${
+                            star <= (hoverRating || rating)
+                              ? "fill-[#1ed760] text-[#1ed760]"
+                              : "text-[#4d4d4d]"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  
+                  {/* Comment */}
+                  <textarea
+                    placeholder="Tulis masukan Anda di sini (opsional)..."
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    className="w-full bg-[#1f1f1f] border border-[#4d4d4d] text-white rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#1ed760]/40 focus:border-[#1ed760] outline-none transition-all resize-none h-24 mb-4"
+                  />
+                  
+                  <Button
+                    onClick={handleSubmitRating}
+                    disabled={isSubmittingRating || rating === 0}
+                    className="btn-gradient w-full"
+                  >
+                    {isSubmittingRating && (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    )}
+                    Kirim Feedback
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 

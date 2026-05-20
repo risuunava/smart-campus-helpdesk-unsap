@@ -249,20 +249,20 @@ export default function LandingPage() {
                     <div className="h-3 bg-white/5 rounded-full w-5/6" />
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-[#1a1a1a] border border-white/5 flex gap-4 items-start">
+                  <div className="p-4 md:p-5 rounded-2xl bg-[#1a1a1a] border border-white/5 flex gap-3 md:gap-4 items-start">
                     <div className="h-8 w-8 rounded-full bg-[#1ed760]/20 flex items-center justify-center shrink-0">
                       <Sparkles className="h-4 w-4 text-[#1ed760]" />
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-300 leading-relaxed">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] md:text-sm text-gray-300 leading-relaxed break-words">
                         Mengerti! Model klasifikasi NLP kami telah menganalisis
                         keluhan Anda. Sistem menyarankan 3 artikel FAQ terkait
                         dan otomatis mengalihkan tiket ini ke antrean Prioritas
                         (Urgent).
                       </p>
                       <div className="mt-3 flex gap-2">
-                        <div className="h-8 w-24 bg-white/5 rounded-full" />
-                        <div className="h-8 w-16 bg-[#1ed760]/10 rounded-full" />
+                        <div className="h-8 w-24 bg-white/5 rounded-full shrink-0" />
+                        <div className="h-8 w-16 bg-[#1ed760]/10 rounded-full shrink-0" />
                       </div>
                     </div>
                   </div>

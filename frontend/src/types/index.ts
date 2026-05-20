@@ -58,6 +58,8 @@ export interface Ticket {
   resolution_note?: string;
   ml_confidence_score?: number;
   chats?: Chat[];
+  rating?: number;
+  rating_comment?: string;
   created_at: string;
   updated_at: string;
 }

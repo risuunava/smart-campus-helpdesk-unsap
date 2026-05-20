@@ -832,6 +832,93 @@ class TicketController extends Controller
     }
 
     /**
+     * POST /api/tickets/{id}/rate
+     * Berikan rating untuk tiket (Mahasiswa only)
+     */
+    public function rate(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+        
+        $ticket = Ticket::find($id);
+        
+        if (!$ticket) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tiket tidak ditemukan',
+            ], 404);
+        }
+        
+        // Hanya pemilik tiket yang bisa memberi rating
+        if ($ticket->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak berhak memberi rating pada tiket ini',
+            ], 403);
+        }
+        
+        // Hanya tiket yang sudah resolved/closed yang bisa dirating
+        if (!in_array($ticket->status, ['resolved', 'closed'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tiket harus diselesaikan (resolved/closed) terlebih dahulu sebelum dapat diberikan rating',
+            ], 400);
+        }
+        
+        // Cegah rating ganda
+        if ($ticket->rating !== null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda sudah memberikan rating untuk tiket ini',
+            ], 400);
+        }
+        
+        $validator = Validator::make($request->all(), [
+            'rating' => 'required|integer|min:1|max:5',
+            'rating_comment' => 'nullable|string|max:500',
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        
+        try {
+            $ticket->rating = $request->rating;
+            $ticket->rating_comment = $request->rating_comment;
+            $ticket->save();
+            
+            // Opsional: Kirim notifikasi ke admin yang resolve tiket
+            if ($ticket->resolved_by) {
+                Notification::send(
+                    $ticket->resolved_by,
+                    'ticket_rated',
+                    'Tiket Anda Mendapat Rating',
+                    'Tiket "' . $ticket->title . '" telah diberikan rating ' . $ticket->rating . ' bintang oleh pelapor.',
+                    ['ticket_code' => $ticket->ticket_code, 'rating' => $ticket->rating],
+                    $ticket->id
+                );
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => $ticket->fresh(),
+                'message' => 'Rating berhasil disimpan. Terima kasih atas feedback Anda!',
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error rating ticket: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan rating',
+            ], 500);
+        }
+    }
+
+    /**
      * GET /api/tickets/export
      * Export tiket ke Excel/CSV (Admin only)
      */

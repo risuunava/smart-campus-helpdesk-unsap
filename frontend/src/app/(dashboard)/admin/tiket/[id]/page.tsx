@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { getPriorityColor, getStatusColor, formatDate, timeAgo } from "@/lib/utils";
 import { 
   ArrowLeft, 
@@ -25,7 +26,8 @@ import {
   Loader2,
   MessageSquare,
   Paperclip,
-  Download
+  Download,
+  Star
 } from "lucide-react";
 
 export default function TicketDetailAdminPage() {
@@ -39,6 +41,12 @@ export default function TicketDetailAdminPage() {
   const [isSending, setIsSending] = useState(false);
   const [isAttachmentOpen, setIsAttachmentOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  
+  // Resolution Dialog states
+  const [isResolutionModalOpen, setIsResolutionModalOpen] = useState(false);
+  const [resolutionNote, setResolutionNote] = useState("");
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+  const [isSubmittingStatus, setIsSubmittingStatus] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -90,11 +98,49 @@ export default function TicketDetailAdminPage() {
   }
 
   async function handleUpdateStatus(status: string) {
+    if (status === "resolved" || status === "closed") {
+      setPendingStatus(status);
+      setResolutionNote(ticket?.resolution_note || "");
+      setIsResolutionModalOpen(true);
+      return;
+    }
+
     try {
+      setIsLoading(true);
       await api.updateTicket(Number(id), { status } as any);
       fetchTicketDetail();
-    } catch (error) {
+      toast.success("Status tiket berhasil diperbarui");
+    } catch (error: any) {
       console.error("Failed to update status:", error);
+      toast.error(error.message || "Gagal memperbarui status");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleSubmitResolution() {
+    if (!pendingStatus || !id) return;
+    if (!resolutionNote.trim()) {
+      toast.error("Catatan penyelesaian wajib diisi");
+      return;
+    }
+
+    setIsSubmittingStatus(true);
+    try {
+      await api.updateTicket(Number(id), {
+        status: pendingStatus,
+        resolution_note: resolutionNote,
+      } as any);
+      fetchTicketDetail();
+      setIsResolutionModalOpen(false);
+      setPendingStatus(null);
+      setResolutionNote("");
+      toast.success("Status tiket berhasil diperbarui");
+    } catch (error: any) {
+      console.error("Failed to update status with resolution:", error);
+      toast.error(error.message || "Gagal memperbarui status");
+    } finally {
+      setIsSubmittingStatus(false);
     }
   }
 
@@ -238,6 +284,32 @@ export default function TicketDetailAdminPage() {
                 {ticket.description}
               </p>
             </div>
+
+            {/* Rating Feedback (if rated) */}
+            {ticket.rating && (
+              <div>
+                <h3 className="text-xs font-semibold text-[#b3b3b3] mb-2 uppercase tracking-wider">RATING & MASUKAN</h3>
+                <div className="p-3 bg-[#1f1f1f] border border-[#282828] rounded-lg space-y-2">
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-4 w-4 ${
+                          star <= (ticket.rating ?? 0)
+                            ? "fill-[#1ed760] text-[#1ed760]"
+                            : "text-[#4d4d4d]"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  {ticket.rating_comment && (
+                    <p className="text-xs text-[#b3b3b3] italic">
+                      "{ticket.rating_comment}"
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Attachment */}
             {ticket.attachment_path && (
@@ -419,6 +491,50 @@ export default function TicketDetailAdminPage() {
             >
               <Download className="h-4 w-4 mr-2" />
               Unduh File
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Resolution Note Modal */}
+      <Dialog open={isResolutionModalOpen} onOpenChange={setIsResolutionModalOpen}>
+        <DialogContent className="bg-[#181818] border-[#282828] text-white max-w-lg overflow-hidden flex flex-col p-6">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-xl">Catatan Penyelesaian Laporan</DialogTitle>
+            <DialogDescription className="text-[#b3b3b3]">
+              Mohon tuliskan solusi atau tindakan yang telah diambil untuk menyelesaikan laporan ini. Informasi ini wajib diisi dan akan dikirimkan kepada pelapor.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 my-2">
+            <Textarea
+              placeholder="Tulis solusi penyelesaian laporan di sini..."
+              value={resolutionNote}
+              onChange={(e) => setResolutionNote(e.target.value)}
+              className="bg-[#1f1f1f] border-[#4d4d4d] text-white focus:ring-[#1ed760]/40 focus:border-[#1ed760] outline-none h-32 resize-none"
+            />
+          </div>
+          
+          <div className="flex justify-end gap-3 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsResolutionModalOpen(false);
+                setPendingStatus(null);
+                setResolutionNote("");
+              }}
+              className="border-[#4d4d4d] text-white hover:bg-[#282828]"
+            >
+              Batal
+            </Button>
+            <Button
+              onClick={handleSubmitResolution}
+              disabled={isSubmittingStatus || !resolutionNote.trim()}
+              className="btn-gradient"
+            >
+              {isSubmittingStatus && (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              )}
+              Simpan & Perbarui Status
             </Button>
           </div>
         </DialogContent>
