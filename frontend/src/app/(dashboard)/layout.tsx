@@ -1,36 +1,32 @@
-"use client";
-
-import { Sidebar } from "@/components/dashboard/Sidebar";
-import { Header } from "@/components/dashboard/Header";
 import { AuthProvider } from "@/hooks/useAuth";
-import { SidebarProvider, useSidebar } from "@/hooks/useSidebar";
+import { SidebarProvider } from "@/hooks/useSidebar";
+import { ClientLayout } from "@/components/dashboard/ClientLayout";
+import { cookies } from "next/headers";
 
-function DashboardContent({ children }: { children: React.ReactNode }) {
-  const { isCollapsed } = useSidebar();
-  
-  return (
-    <div className="min-h-screen bg-[#121212]">
-      <Sidebar />
-      <Header />
-      <main className={`${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'} min-h-screen pt-16 transition-all duration-300 ease-in-out`}>
-        {children}
-      </main>
-    </div>
-  );
-}
-
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const cachedUserStr = cookieStore.get("cached_user")?.value;
+  let initialUser = null;
+
+  if (cachedUserStr) {
+    try {
+      initialUser = JSON.parse(cachedUserStr);
+    } catch (e) {
+      // ignore parse error
+    }
+  }
+
   return (
-    <AuthProvider>
+    <AuthProvider initialUser={initialUser}>
       <SidebarProvider>
-        <DashboardContent>
+        <ClientLayout>
           {children}
-        </DashboardContent>
+        </ClientLayout>
       </SidebarProvider>
     </AuthProvider>
   );
-}
+}

@@ -204,7 +204,7 @@ export default function MahasiswaDashboardPage() {
                 placeholder="Cari solusi cepat... (Tekan Enter)"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
-                    window.location.href = `/mahasiswa/faq?q=${encodeURIComponent(e.currentTarget.value.trim())}`;
+                    router.push(`/mahasiswa/faq?q=${encodeURIComponent(e.currentTarget.value.trim())}`);
                   }
                 }}
                 className="w-full bg-[#121212] border border-[#3e3e3e] rounded-full py-2.5 pl-10 pr-4 text-[11px] text-white placeholder:text-[#666666] outline-none focus:border-[#1ed760] transition-all"

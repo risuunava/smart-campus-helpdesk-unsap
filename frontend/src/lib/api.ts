@@ -1,13 +1,13 @@
-import { 
-  User, 
-  AuthResponse, 
-  LoginCredentials, 
-  CreateTicketForm, 
-  TicketListResponse, 
-  Ticket, 
-  DashboardStats, 
-  TrendData, 
-  FAQ, 
+import {
+  User,
+  AuthResponse,
+  LoginCredentials,
+  CreateTicketForm,
+  TicketListResponse,
+  Ticket,
+  DashboardStats,
+  TrendData,
+  FAQ,
   FAQSuggestion,
   CategoryDistribution,
   CampusMood,
@@ -15,6 +15,7 @@ import {
   Notification,
   NotificationListResponse,
 } from "@/types";
+import Cookies from "js-cookie";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
@@ -25,18 +26,18 @@ class ApiClient {
   private token: string | null = null;
 
   constructor() {
-    // Load token dari localStorage
+    // Load token dari cookie
     if (typeof window !== "undefined") {
-      this.token = localStorage.getItem("auth_token");
+      this.token = Cookies.get("auth_token") || null;
     }
   }
 
   setToken(token: string | null) {
     this.token = token;
     if (token) {
-      localStorage.setItem("auth_token", token);
+      Cookies.set("auth_token", token, { expires: 7, path: "/" });
     } else {
-      localStorage.removeItem("auth_token");
+      Cookies.remove("auth_token", { path: "/" });
     }
   }
 
@@ -46,7 +47,7 @@ class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<T> {
     const url = `${API_URL}${endpoint}`;
 
@@ -57,7 +58,8 @@ class ApiClient {
     };
 
     if (this.token) {
-      (headers as Record<string, string>)["Authorization"] = `Bearer ${this.token}`;
+      (headers as Record<string, string>)["Authorization"] =
+        `Bearer ${this.token}`;
     }
 
     // Timeout 30 detik agar tidak hang selamanya di dev server single-threaded
@@ -87,14 +89,15 @@ class ApiClient {
       return response.json();
     } catch (err: any) {
       if (err.name === "AbortError") {
-        throw new Error("Koneksi ke server timeout. Pastikan backend berjalan di http://localhost:8000");
+        throw new Error(
+          "Koneksi ke server timeout. Pastikan backend berjalan di http://localhost:8000",
+        );
       }
       throw err;
     } finally {
       clearTimeout(timeoutId);
     }
   }
-
 
   // ============================================
   // AUTH ENDPOINTS
@@ -115,13 +118,16 @@ class ApiClient {
   }
 
   async getUser(): Promise<User> {
-    const response = await this.request<{ success: boolean; data: User }>("/auth/user", {
-      cache: "no-store",
-      headers: {
-        "Cache-Control": "no-cache",
-        "Pragma": "no-cache"
-      }
-    });
+    const response = await this.request<{ success: boolean; data: User }>(
+      "/auth/user",
+      {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+      },
+    );
     return response.data;
   }
 
@@ -133,10 +139,19 @@ class ApiClient {
     study_program?: string;
     semester?: string | number;
   }): Promise<{ success: boolean; data: User; message: string }> {
-    return this.request("/auth/profile", {
+    const response = await this.request<{
+      success: boolean;
+      data: User;
+      message: string;
+    }>("/auth/profile", {
       method: "PUT",
       body: JSON.stringify(data),
     });
+    Cookies.set("cached_user", JSON.stringify(response.data), {
+      expires: 7,
+      path: "/",
+    });
+    return response;
   }
 
   async updatePassword(data: {
@@ -150,13 +165,16 @@ class ApiClient {
     });
   }
 
-  async updateAvatar(file: File): Promise<{ success: boolean; data: User; message: string }> {
+  async updateAvatar(
+    file: File,
+  ): Promise<{ success: boolean; data: User; message: string }> {
     const formData = new FormData();
     formData.append("avatar", file);
 
     const headers: HeadersInit = {};
     if (this.token) {
-      (headers as Record<string, string>)["Authorization"] = `Bearer ${this.token}`;
+      (headers as Record<string, string>)["Authorization"] =
+        `Bearer ${this.token}`;
     }
 
     const response = await fetch(`${API_URL}/auth/avatar`, {
@@ -173,7 +191,12 @@ class ApiClient {
       throw new Error(error.message || "Failed to update avatar");
     }
 
-    return response.json();
+    const result = await response.json();
+    Cookies.set("cached_user", JSON.stringify(result.data), {
+      expires: 7,
+      path: "/",
+    });
+    return result;
   }
 
   // ============================================
@@ -204,11 +227,14 @@ class ApiClient {
     return this.request(`/tickets/${id}`);
   }
 
-  async createTicket(formData: FormData): Promise<{ success: boolean; data: Ticket; message: string }> {
+  async createTicket(
+    formData: FormData,
+  ): Promise<{ success: boolean; data: Ticket; message: string }> {
     const headers: HeadersInit = {};
     // Jangan set Content-Type, biarkan browser set multipart/form-data
     if (this.token) {
-      (headers as Record<string, string>)["Authorization"] = `Bearer ${this.token}`;
+      (headers as Record<string, string>)["Authorization"] =
+        `Bearer ${this.token}`;
     }
 
     const response = await fetch(`${API_URL}/tickets`, {
@@ -228,20 +254,27 @@ class ApiClient {
     return response.json();
   }
 
-  async updateTicket(id: number, data: Partial<Ticket>): Promise<{ success: boolean; data: Ticket }> {
+  async updateTicket(
+    id: number,
+    data: Partial<Ticket>,
+  ): Promise<{ success: boolean; data: Ticket }> {
     return this.request(`/tickets/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
   }
 
-  async updateAttachment(id: number, file: File): Promise<{ success: boolean; data: Ticket; message: string }> {
+  async updateAttachment(
+    id: number,
+    file: File,
+  ): Promise<{ success: boolean; data: Ticket; message: string }> {
     const formData = new FormData();
     formData.append("attachment", file);
-    
+
     const headers: HeadersInit = {};
     if (this.token) {
-      (headers as Record<string, string>)["Authorization"] = `Bearer ${this.token}`;
+      (headers as Record<string, string>)["Authorization"] =
+        `Bearer ${this.token}`;
     }
 
     const response = await fetch(`${API_URL}/tickets/${id}/attachment`, {
@@ -261,7 +294,9 @@ class ApiClient {
     return response.json();
   }
 
-  async deleteAttachment(id: number): Promise<{ success: boolean; data: Ticket; message: string }> {
+  async deleteAttachment(
+    id: number,
+  ): Promise<{ success: boolean; data: Ticket; message: string }> {
     return this.request(`/tickets/${id}/attachment`, {
       method: "DELETE",
     });
@@ -269,7 +304,7 @@ class ApiClient {
 
   async rateTicket(
     id: number,
-    data: { rating: number; rating_comment?: string }
+    data: { rating: number; rating_comment?: string },
   ): Promise<{ success: boolean; data: Ticket; message: string }> {
     return this.request(`/tickets/${id}/rate`, {
       method: "POST",
@@ -280,7 +315,7 @@ class ApiClient {
   async correctMLLabel(
     ticketId: number,
     correctPriority: string,
-    correctionNote?: string
+    correctionNote?: string,
   ): Promise<{ success: boolean; message: string }> {
     return this.request(`/tickets/${ticketId}/correct-ml`, {
       method: "POST",
@@ -294,7 +329,9 @@ class ApiClient {
   // ============================================
   // FAQ ENDPOINTS
   // ============================================
-  async getFAQSuggestions(query: string): Promise<{ success: boolean; data: FAQSuggestion[] }> {
+  async getFAQSuggestions(
+    query: string,
+  ): Promise<{ success: boolean; data: FAQSuggestion[] }> {
     return this.request("/tickets/faq-suggestion", {
       method: "POST",
       body: JSON.stringify({ query }),
@@ -304,30 +341,45 @@ class ApiClient {
   // ============================================
   // DASHBOARD ENDPOINTS
   // ============================================
-  async getDashboardStats(): Promise<{ success: boolean; data: DashboardStats }> {
+  async getDashboardStats(): Promise<{
+    success: boolean;
+    data: DashboardStats;
+  }> {
     return this.request("/dashboard/stats");
   }
 
-  async getDashboardTrend(period: string = "monthly"): Promise<{ success: boolean; data: TrendData[] }> {
+  async getDashboardTrend(
+    period: string = "monthly",
+  ): Promise<{ success: boolean; data: TrendData[] }> {
     return this.request(`/dashboard/trend?period=${period}`);
   }
 
-  async getCategoryDistribution(): Promise<{ success: boolean; data: CategoryDistribution[] }> {
+  async getCategoryDistribution(): Promise<{
+    success: boolean;
+    data: CategoryDistribution[];
+  }> {
     return this.request("/dashboard/category-distribution");
   }
 
-  async getCampusMood(period: string = "6_months"): Promise<{ success: boolean; data: CampusMood[] }> {
+  async getCampusMood(
+    period: string = "6_months",
+  ): Promise<{ success: boolean; data: CampusMood[] }> {
     return this.request(`/dashboard/campus-mood?period=${period}`);
   }
 
   // ============================================
   // CHAT ENDPOINTS
   // ============================================
-  async getChats(ticketId: number): Promise<{ success: boolean; data: Chat[] }> {
+  async getChats(
+    ticketId: number,
+  ): Promise<{ success: boolean; data: Chat[] }> {
     return this.request(`/tickets/${ticketId}/chats`);
   }
 
-  async sendMessage(ticketId: number, message: string): Promise<{ success: boolean; data: Chat }> {
+  async sendMessage(
+    ticketId: number,
+    message: string,
+  ): Promise<{ success: boolean; data: Chat }> {
     return this.request(`/tickets/${ticketId}/chats`, {
       method: "POST",
       body: JSON.stringify({ message }),
@@ -341,7 +393,11 @@ class ApiClient {
     format?: string;
     date_from?: string;
     date_to?: string;
-  }): Promise<{ success: boolean; data: { filename: string; url: string; total_records: number }; message: string }> {
+  }): Promise<{
+    success: boolean;
+    data: { filename: string; url: string; total_records: number };
+    message: string;
+  }> {
     const searchParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -359,23 +415,36 @@ class ApiClient {
     return this.request("/notifications");
   }
 
-  async getUnreadCount(): Promise<{ success: boolean; data: { unread_count: number } }> {
+  async getUnreadCount(): Promise<{
+    success: boolean;
+    data: { unread_count: number };
+  }> {
     return this.request("/notifications/unread-count");
   }
 
-  async markNotificationRead(id: number): Promise<{ success: boolean; message: string }> {
+  async markNotificationRead(
+    id: number,
+  ): Promise<{ success: boolean; message: string }> {
     return this.request(`/notifications/${id}/read`, { method: "PUT" });
   }
 
-  async markAllNotificationsRead(): Promise<{ success: boolean; message: string }> {
+  async markAllNotificationsRead(): Promise<{
+    success: boolean;
+    message: string;
+  }> {
     return this.request("/notifications/read-all", { method: "PUT" });
   }
 
-  async deleteNotification(id: number): Promise<{ success: boolean; message: string }> {
+  async deleteNotification(
+    id: number,
+  ): Promise<{ success: boolean; message: string }> {
     return this.request(`/notifications/${id}`, { method: "DELETE" });
   }
 
-  async clearReadNotifications(): Promise<{ success: boolean; message: string }> {
+  async clearReadNotifications(): Promise<{
+    success: boolean;
+    message: string;
+  }> {
     return this.request("/notifications/clear-read", { method: "DELETE" });
   }
 }

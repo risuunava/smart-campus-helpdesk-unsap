@@ -6,18 +6,55 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import { api } from "@/lib/api";
-import { ticketFormSchema, TicketFormData, validateFile } from "@/lib/validators";
+import {
+  ticketFormSchema,
+  TicketFormData,
+  validateFile,
+} from "@/lib/validators";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Upload, X, Lightbulb, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  Loader2,
+  Upload,
+  X,
+  Lightbulb,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
 import { FAQ } from "@/types";
 
 const CATEGORIES = [
@@ -59,7 +96,7 @@ export function TicketForm() {
   // FAQ Suggestion API Call
   useEffect(() => {
     const query = `${debouncedTitle} ${debouncedDescription}`.trim();
-    
+
     if (query.length >= 10) {
       checkFAQSimilarity(query);
     }
@@ -69,7 +106,7 @@ export function TicketForm() {
     setIsCheckingFAQ(true);
     try {
       const response = await api.getFAQSuggestions(query);
-      
+
       if (response.data && response.data.length > 0) {
         setFaqMatches(response.data as any);
         setShowFAQSuggestion(true);
@@ -85,7 +122,7 @@ export function TicketForm() {
   // Handle file change
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    
+
     if (file) {
       const error = validateFile(file);
       if (error) {
@@ -124,15 +161,16 @@ export function TicketForm() {
       // Reset form
       form.reset();
       setAttachment(null);
-      
+
       // Redirect ke halaman tiket
       router.push("/mahasiswa/tiket-saya");
     } catch (error: any) {
       console.error("Form submission error:", error);
-      
+
       // Coba ambil detail error jika ada (format Laravel validation)
-      let errorMessage = error.message || "Terjadi kesalahan. Silakan coba lagi.";
-      
+      let errorMessage =
+        error.message || "Terjadi kesalahan. Silakan coba lagi.";
+
       toast({
         title: "Gagal Membuat Laporan",
         description: errorMessage,
@@ -164,7 +202,10 @@ export function TicketForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Kategori Laporan *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger className="input-focus">
                           <SelectValue placeholder="Pilih kategori laporan" />
@@ -274,10 +315,12 @@ export function TicketForm() {
                 render={({ field }) => (
                   <FormItem className="flex items-center justify-between rounded-lg border border-[#282828] bg-[#1f1f1f] p-4">
                     <div>
-                      <FormLabel className="text-base text-white">Lapor sebagai Anonim</FormLabel>
+                      <FormLabel className="text-base text-white">
+                        Lapor sebagai Anonim
+                      </FormLabel>
                       <FormDescription className="text-[#666666]">
-                        Identitas Anda akan disamarkan dari admin biasa.
-                        Hanya Master Admin yang dapat melihat identitas asli.
+                        Identitas Anda akan disamarkan dari admin biasa. Hanya
+                        Master Admin yang dapat melihat identitas asli.
                       </FormDescription>
                     </div>
                     <FormControl>
@@ -336,10 +379,11 @@ export function TicketForm() {
               Saran FAQ Terkait
             </DialogTitle>
             <DialogDescription className="text-[#b3b3b3]">
-              Berikut adalah beberapa informasi yang mungkin dapat membantu menyelesaikan kendala Anda.
+              Berikut adalah beberapa informasi yang mungkin dapat membantu
+              menyelesaikan kendala Anda.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 max-h-[400px] overflow-y-auto">
             {faqMatches.map((faq, index) => (
               <Card key={index} className="card-hover cursor-pointer">

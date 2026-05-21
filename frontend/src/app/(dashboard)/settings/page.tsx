@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { AvatarCropModal } from "@/components/ui/AvatarCropModal";
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const router = useRouter();
   
   const [profileForm, setProfileForm] = useState({
     name: user?.name || "",
@@ -64,7 +66,7 @@ export default function SettingsPage() {
       await api.updateAvatar(croppedFile);
       toast.success("Foto profil berhasil diperbarui!");
       setCropModalOpen(false);
-      setTimeout(() => window.location.reload(), 1000);
+      setTimeout(() => router.refresh(), 1000);
     } catch (error: any) {
       toast.error(error.message || "Gagal memperbarui foto profil");
     } finally {
@@ -78,7 +80,7 @@ export default function SettingsPage() {
     try {
       await api.updateProfile(profileForm);
       toast.success("Profil berhasil diperbarui");
-      setTimeout(() => window.location.reload(), 1000);
+      setTimeout(() => router.refresh(), 1000);
     } catch (error: any) {
       toast.error(error.message || "Gagal memperbarui profil");
     } finally {

@@ -4,6 +4,7 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { User, LoginCredentials } from "@/types";
+import Cookies from "js-cookie";
 
 interface AuthContextType {
   user: User | null;
@@ -23,11 +24,34 @@ const AuthContext = createContext<AuthContextType>({
   error: null,
 });
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export function AuthProvider({ children, initialUser = null }: { children: React.ReactNode; initialUser?: User | null }) {
+  const [user, setUser] = useState<User | null>(() => {
+    if (initialUser) return initialUser;
+    if (typeof window !== "undefined") {
+      const cached = Cookies.get("cached_user");
+      return cached ? JSON.parse(cached) : null;
+    }
+    return null;
+  });
+  
+  const [isLoading, setIsLoading] = useState(() => {
+    if (initialUser) return false;
+    if (typeof window !== "undefined") {
+      return !Cookies.get("auth_token") || !Cookies.get("cached_user");
+    }
+    return true;
+  });
+  
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // Sync dengan perubahan server (router.refresh())
+  useEffect(() => {
+    if (initialUser) {
+      setUser(initialUser);
+      setIsLoading(false);
+    }
+  }, [initialUser]);
 
   // Check if user is logged in on mount
   useEffect(() => {
@@ -40,10 +64,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (token) {
         const userData = await api.getUser();
         setUser(userData);
+        Cookies.set("cached_user", JSON.stringify(userData), { expires: 7, path: "/" });
+      } else {
+        Cookies.remove("cached_user", { path: "/" });
       }
     } catch (err) {
       console.error("Auth check failed:", err);
       api.setToken(null);
+      Cookies.remove("cached_user", { path: "/" });
     } finally {
       setIsLoading(false);
     }
@@ -55,6 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await api.login(credentials);
       setUser(response.data.user);
+      Cookies.set("cached_user", JSON.stringify(response.data.user), { expires: 7, path: "/" });
       
       // Role-based redirect
       const role = response.data.user.role;
@@ -79,6 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setUser(null);
       api.setToken(null);
+      Cookies.remove("cached_user", { path: "/" });
       router.push("/login");
     }
   }
