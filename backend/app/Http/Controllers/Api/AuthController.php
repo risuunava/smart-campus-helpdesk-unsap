@@ -93,7 +93,7 @@ class AuthController extends Controller
             'study_program' => $request->study_program,
             'semester' => $request->semester,
             'role' => 'mahasiswa',
-            'is_active' => true,
+            'is_active' => 'true',
         ]);
         
         $token = $user->createToken('auth-token', ['ticket:create', 'ticket:read'])->plainTextToken;

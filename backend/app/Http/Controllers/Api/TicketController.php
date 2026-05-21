@@ -180,7 +180,7 @@ class TicketController extends Controller
             $ticket->title = $request->title;
             $ticket->description = $request->description;
             $ticket->category = $request->category;
-            $ticket->is_anonymous = $request->is_anonymous ?? false;
+            $ticket->is_anonymous = ($request->is_anonymous ?? false) ? 'true' : 'false';
             $ticket->attachment_path = $attachmentPath;
             $ticket->attachment_type = $attachmentType;
             $ticket->status = 'open';
@@ -211,7 +211,7 @@ class TicketController extends Controller
             );
 
             // Kirim notifikasi ke semua admin dan master admin
-            $admins = User::whereIn('role', ['admin', 'master_admin'])->where('is_active', true)->get();
+            $admins = User::whereIn('role', ['admin', 'master_admin'])->where('is_active', 'true')->get();
             foreach ($admins as $admin) {
                 Notification::send(
                     $admin->id,

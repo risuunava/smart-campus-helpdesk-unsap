@@ -77,7 +77,7 @@ class ChatController extends Controller
             'sender_id' => $request->user()->id,
             'message'   => $request->message,
             'sender_type' => $request->user()->role === 'mahasiswa' ? 'mahasiswa' : 'admin',
-            'is_read'   => false,
+            'is_read'   => 'false',
         ]);
 
         // Load relasi sender agar response lengkap
@@ -119,7 +119,7 @@ class ChatController extends Controller
                 );
             } else {
                 // Jika belum ada yang di-assign, notif ke semua admin
-                $admins = \App\Models\User::whereIn('role', ['admin', 'master_admin'])->where('is_active', true)->get();
+                $admins = \App\Models\User::whereIn('role', ['admin', 'master_admin'])->where('is_active', 'true')->get();
                 foreach ($admins as $admin) {
                     Notification::send(
                         $admin->id,
@@ -162,7 +162,7 @@ class ChatController extends Controller
             return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
         }
 
-        $chat->update(['is_read' => true]);
+        $chat->update(['is_read' => 'true']);
 
         return response()->json([
             'success' => true,

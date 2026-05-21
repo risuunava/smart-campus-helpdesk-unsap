@@ -29,28 +29,28 @@ class ChatSeeder extends Seeder
                 'message' => 'Saya benar-benar keberatan dengan tagihan UKT yang salah ini. Saya dari keluarga tidak mampu dan ini sangat memberatkan. Mohon segera dibantu.',
                 'sender_type' => 'mahasiswa',
                 'hours_ago' => 48,
-                'is_read' => true,
+                'is_read' => 'true',
             ],
             [
                 'sender_id' => $ticket->assigned_to,
                 'message' => 'Selamat siang, kami sudah menerima laporan Anda. Tim keuangan sedang memeriksa data pembayaran Anda. Mohon kesabarannya, akan kami proses dalam 1x24 jam.',
                 'sender_type' => 'admin',
                 'hours_ago' => 46,
-                'is_read' => true,
+                'is_read' => 'true',
             ],
             [
                 'sender_id' => $ticket->user_id,
                 'message' => 'Terima kasih atas responnya. Mohon segera diproses karena jatuh tempo pembayaran tinggal 5 hari lagi. Saya khawatir kena denda.',
                 'sender_type' => 'mahasiswa',
                 'hours_ago' => 24,
-                'is_read' => false,
+                'is_read' => 'false',
             ],
             [
                 'sender_id' => $ticket->assigned_to,
                 'message' => 'Baik, kami pahami kekhawatiran Anda. Tim keuangan sudah menemukan kesalahan input data. Sedang dalam proses koreksi. Estimasi selesai hari ini.',
                 'sender_type' => 'admin',
                 'hours_ago' => 22,
-                'is_read' => false,
+                'is_read' => 'false',
             ],
         ];
 

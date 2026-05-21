@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
             'study_program' => 'Teknik Informatika',
             'semester' => 5,
             'role' => 'mahasiswa',
-            'is_active' => true,
+            'is_active' => 'true',
         ],
         [
             'name' => 'Siti Nurhaliza',
@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
             'study_program' => 'Manajemen',
             'semester' => 3,
             'role' => 'mahasiswa',
-            'is_active' => true,
+            'is_active' => 'true',
         ],
         [
             'name' => 'Budi Santoso',
@@ -44,7 +44,7 @@ class UserSeeder extends Seeder
             'study_program' => 'Teknik Sipil',
             'semester' => 7,
             'role' => 'mahasiswa',
-            'is_active' => true,
+            'is_active' => 'true',
         ],
         
         // ADMIN
@@ -57,7 +57,7 @@ class UserSeeder extends Seeder
             'study_program' => null,
             'semester' => null,
             'role' => 'admin',
-            'is_active' => true,
+            'is_active' => 'true',
         ],
         [
             'name' => 'Dra. Maya Indah',
@@ -68,7 +68,7 @@ class UserSeeder extends Seeder
             'study_program' => null,
             'semester' => null,
             'role' => 'admin',
-            'is_active' => true,
+            'is_active' => 'true',
         ],
         
         // MASTER ADMIN
@@ -81,7 +81,7 @@ class UserSeeder extends Seeder
             'study_program' => null,
             'semester' => null,
             'role' => 'master_admin',
-            'is_active' => true,
+            'is_active' => 'true',
         ],
     ];
 

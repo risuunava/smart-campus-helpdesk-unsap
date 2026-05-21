@@ -99,7 +99,7 @@ class FaqSeeder extends Seeder
         $count = 0;
         foreach ($this->getFaqData() as $faqData) {
             $faqData['keywords'] = json_encode($faqData['keywords']);
-            $faqData['is_active'] = true;
+            $faqData['is_active'] = 'true';
             $faqData['created_by'] = $admin->id;
             
             Faq::create($faqData);
