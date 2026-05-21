@@ -191,7 +191,7 @@ export default function TiketSayaPage() {
               <th className="px-6 py-4 text-[10px] font-bold th-text-m uppercase tracking-widest text-right">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y" style={{ divideColor: 'var(--th-border)' }}>
+          <tbody className="divide-y divide-[var(--th-border)]">
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <tr key={i} style={{ borderBottomColor: 'var(--th-border)' }}>
