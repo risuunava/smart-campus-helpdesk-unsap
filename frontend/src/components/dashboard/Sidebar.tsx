@@ -150,7 +150,7 @@ export function Sidebar() {
     <>
       {/* Mobile Toggle */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-[#1f1f1f] rounded-full shadow-lg border border-[#282828]"
+        className="lg:hidden fixed top-4 left-6 z-50 p-2 bg-[#1f1f1f] rounded-full shadow-lg border border-[#282828]"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
         {isMobileOpen ? <X className="h-5 w-5 text-white" /> : <Menu className="h-5 w-5 text-white" />}

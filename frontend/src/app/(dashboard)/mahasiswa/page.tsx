@@ -86,7 +86,7 @@ export default function MahasiswaDashboardPage() {
       {/* Main Layout Grid */}
       <div className="grid lg:grid-cols-12 gap-6">
         {/* Left Column (8 cols) - On mobile this is middle */}
-        <div className="lg:col-span-8 order-2 lg:order-1 space-y-6">
+        <div className="lg:col-span-8 order-2 lg:order-1 space-y-6 min-w-0">
           {/* Stats Row - Compact cards */}
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-[#181818] border border-[#282828] rounded-xl p-4 flex flex-col items-center lg:items-start">
@@ -178,7 +178,7 @@ export default function MahasiswaDashboardPage() {
         </div>
 
         {/* Right Column (4 cols) - On mobile this is TOP */}
-        <div className="lg:col-span-4 order-1 lg:order-2 space-y-6">
+        <div className="lg:col-span-4 order-1 lg:order-2 space-y-6 min-w-0">
           {/* Primary CTA - Mulai Laporan - Dark with subtle top green stroke */}
           <div className="rounded-[24px] bg-[#0f0f0f] border border-white/5 p-6 shadow-2xl relative overflow-hidden">
             {/* The elegant top green stroke (gradient) */}
