@@ -4,7 +4,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useSidebar } from "@/hooks/useSidebar";
 import { usePathname, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { 
   LayoutDashboard, 
   Ticket, 
@@ -150,10 +149,11 @@ export function Sidebar() {
     <>
       {/* Mobile Toggle */}
       <button
-        className="lg:hidden fixed top-4 left-6 z-50 p-2 bg-[#1f1f1f] rounded-full shadow-lg border border-[#282828]"
+        className="lg:hidden fixed top-4 left-6 z-50 p-2 rounded-full shadow-lg border"
+        style={{ background: 'var(--th-raised)', borderColor: 'var(--th-border)' }}
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
-        {isMobileOpen ? <X className="h-5 w-5 text-white" /> : <Menu className="h-5 w-5 text-white" />}
+        {isMobileOpen ? <X className="h-5 w-5" style={{ color: 'var(--th-text-primary)' }} /> : <Menu className="h-5 w-5" style={{ color: 'var(--th-text-primary)' }} />}
       </button>
 
       {/* Overlay */}
@@ -166,13 +166,14 @@ export function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full ${isCollapsed ? 'w-20' : 'w-64'} bg-[#121212] border-r border-[#282828] z-50 transform transition-all duration-300 ${
+        className={`fixed top-0 left-0 h-full ${isCollapsed ? 'w-20' : 'w-64'} z-50 transform transition-all duration-300 ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0`}
+        } lg:translate-x-0 border-r`}
+        style={{ background: 'var(--th-sidebar-bg)', borderColor: 'var(--th-border)' }}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-6 border-b border-[#282828] flex items-center justify-between relative">
+          <div className="p-6 border-b flex items-center justify-between relative" style={{ borderColor: 'var(--th-border)' }}>
             <Link href="/" className={`flex items-center gap-3 ${isCollapsed ? 'mx-auto' : ''}`}>
               <div className="w-10 h-10 flex items-center justify-center shrink-0">
                 <Image 
@@ -185,15 +186,16 @@ export function Sidebar() {
               </div>
               {!isCollapsed && (
                 <div className="leading-tight">
-                  <h1 className="font-bold text-white text-sm tracking-wide">UNSAP</h1>
-                  <p className="text-[11px] text-[#b3b3b3]">Helpdesk</p>
+                  <h1 className="font-bold text-sm tracking-wide" style={{ color: 'var(--th-text-primary)' }}>UNSAP</h1>
+                  <p className="text-[11px]" style={{ color: 'var(--th-text-secondary)' }}>Helpdesk</p>
                 </div>
               )}
             </Link>
             {!isCollapsed && (
               <button 
                 onClick={toggleSidebar} 
-                className="hidden lg:flex absolute right-4 text-gray-400 hover:text-white transition-colors"
+                className="hidden lg:flex absolute right-4 transition-colors"
+                style={{ color: 'var(--th-text-muted)' }}
                 title="Tutup Sidebar"
               >
                 <PanelLeft className="h-5 w-5" />
@@ -202,10 +204,11 @@ export function Sidebar() {
           </div>
 
           {isCollapsed && (
-            <div className="hidden lg:flex justify-center p-3 border-b border-[#282828]">
+            <div className="hidden lg:flex justify-center p-3 border-b" style={{ borderColor: 'var(--th-border)' }}>
               <button 
                 onClick={toggleSidebar} 
-                className="text-gray-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-[#1f1f1f]"
+                className="transition-colors p-1.5 rounded-lg"
+                style={{ color: 'var(--th-text-muted)' }}
                 title="Buka Sidebar"
               >
                 <PanelRight className="h-5 w-5" />
@@ -214,8 +217,10 @@ export function Sidebar() {
           )}
 
           {/* User Info */}
-          <div className={`p-4 border-b border-[#282828] transition-all duration-300 ${isCollapsed ? 'flex justify-center' : ''}`}>
-            <div className={`flex items-center gap-3 p-3 bg-[#1f1f1f] rounded-lg transition-all duration-300 ${isCollapsed ? 'w-full justify-center px-0 bg-transparent' : ''}`}>
+          <div className={`p-4 border-b transition-all duration-300 ${isCollapsed ? 'flex justify-center' : ''}`} style={{ borderColor: 'var(--th-border)' }}>
+            <div className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-300 ${isCollapsed ? 'w-full justify-center px-0 bg-transparent' : ''}`}
+              style={!isCollapsed ? { background: 'var(--th-raised)' } : undefined}
+            >
               <div className="h-10 w-10 rounded-full flex items-center justify-center overflow-hidden shrink-0"
                 style={{
                   background: user.avatar_url ? 'transparent' : (user.role === "master_admin" ? "rgba(251, 191, 36, 0.15)" :
@@ -242,10 +247,10 @@ export function Sidebar() {
               </div>
               {!isCollapsed && (
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm text-white truncate">
+                  <p className="font-semibold text-sm truncate" style={{ color: 'var(--th-text-primary)' }}>
                     {user.name}
                   </p>
-                  <p className="text-xs text-[#b3b3b3]">
+                  <p className="text-xs" style={{ color: 'var(--th-text-secondary)' }}>
                     {user.role === "master_admin" ? "Master Admin" : 
                      user.role === "admin" ? "Admin" : "Mahasiswa"}
                   </p>
@@ -262,8 +267,11 @@ export function Sidebar() {
                   className={`flex items-center gap-3 py-2.5 rounded-lg text-sm transition-all duration-150 ${isCollapsed ? 'justify-center px-0' : 'px-3'} ${
                     item.active
                       ? "bg-[#1ed760]/10 text-[#1ed760] font-semibold"
-                      : "text-[#b3b3b3] hover:text-white hover:bg-[#1f1f1f]"
+                      : ""
                   } relative`}
+                  style={!item.active ? { color: 'var(--th-text-secondary)' } : undefined}
+                  onMouseEnter={(e) => { if (!item.active) { e.currentTarget.style.background = 'var(--th-hover)'; e.currentTarget.style.color = 'var(--th-text-primary)'; }}}
+                  onMouseLeave={(e) => { if (!item.active) { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--th-text-secondary)'; }}}
                 >
                   <item.icon className={`h-5 w-5 shrink-0 ${
                     item.active ? "text-[#1ed760]" :
@@ -288,9 +296,12 @@ export function Sidebar() {
           </nav>
 
           {/* Logout */}
-          <div className="p-3 border-t border-[#282828]">
+          <div className="p-3 border-t space-y-1" style={{ borderColor: 'var(--th-border)' }}>
             <button
-              className={`w-full flex items-center gap-3 py-2.5 rounded-lg text-sm text-[#b3b3b3] hover:text-[#f3727f] hover:bg-red-500/10 transition-all duration-150 ${isCollapsed ? 'justify-center px-0' : 'px-3'}`}
+              className={`w-full flex items-center gap-3 py-2.5 rounded-lg text-sm transition-all duration-150 ${isCollapsed ? 'justify-center px-0' : 'px-3'}`}
+              style={{ color: 'var(--th-text-secondary)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#f3727f'; e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--th-text-secondary)'; e.currentTarget.style.background = ''; }}
               onClick={() => {
                 setIsMobileOpen(false);
                 logout();

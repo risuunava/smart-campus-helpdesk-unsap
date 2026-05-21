@@ -56,10 +56,10 @@ export default function TiketSayaPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-2xl font-bold th-text tracking-tight">
             Tiket Saya
           </h1>
-          <p className="text-sm text-[#b3b3b3] mt-1">
+          <p className="text-sm th-text-2 mt-1">
             Daftar laporan yang telah Anda ajukan
           </p>
         </div>
@@ -72,14 +72,14 @@ export default function TiketSayaPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-[#181818] border border-[#282828] rounded-xl p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
+      <div className="card-clean rounded-xl p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
         <div className="relative w-full md:flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#666666]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 th-text-m" />
           <input
             placeholder="Cari berdasarkan judul atau kode..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-[#121212] border border-[#333333] text-white placeholder:text-[#4d4d4d] rounded-lg pl-10 pr-4 py-2 text-sm focus:border-[#1ed760] outline-none transition-colors"
+            className="w-full input-focus pl-10 pr-4 py-2 text-sm"
           />
         </div>
         
@@ -88,20 +88,21 @@ export default function TiketSayaPage() {
             value={sortBy} 
             onValueChange={(val) => { setSortBy(val); setCurrentPage(1); }}
           >
-            <SelectTrigger className="w-full md:w-[160px] bg-[#121212] border-[#333333] text-sm text-[#b3b3b3] rounded-lg">
+            <SelectTrigger className="w-full md:w-[160px] th-base th-border th-text-2 rounded-lg hover:border-th-border-s">
               <SelectValue placeholder="Urutkan" />
             </SelectTrigger>
-            <SelectContent className="bg-[#181818] border-[#282828] text-[#b3b3b3]">
-              <SelectItem value="created_at">Tanggal</SelectItem>
-              <SelectItem value="priority">Prioritas</SelectItem>
-              <SelectItem value="status">Status</SelectItem>
-              <SelectItem value="title">Judul</SelectItem>
+            <SelectContent className="th-base th-border th-text-2">
+              <SelectItem value="created_at" className="focus:bg-th-hover focus:text-th-text cursor-pointer">Tanggal</SelectItem>
+              <SelectItem value="priority" className="focus:bg-th-hover focus:text-th-text cursor-pointer">Prioritas</SelectItem>
+              <SelectItem value="status" className="focus:bg-th-hover focus:text-th-text cursor-pointer">Status</SelectItem>
+              <SelectItem value="title" className="focus:bg-th-hover focus:text-th-text cursor-pointer">Judul</SelectItem>
             </SelectContent>
           </Select>
 
           <button
             onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-            className="p-2 bg-[#121212] border border-[#333333] text-[#b3b3b3] hover:text-white rounded-lg transition-colors"
+            className="p-2 th-base th-border th-text-2 hover:th-text rounded-lg transition-colors border"
+            style={{ borderColor: 'var(--th-border)' }}
             title={sortOrder === "asc" ? "Urutan Menurun" : "Urutan Menaik"}
           >
             <ArrowUpDown className={`h-4 w-4 ${sortOrder === "asc" ? "" : "rotate-180"}`} />
@@ -113,15 +114,15 @@ export default function TiketSayaPage() {
       <div className="grid grid-cols-1 gap-3 md:hidden">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-[#181818] border border-[#282828] rounded-xl p-5 h-[120px]">
-              <Skeleton className="h-4 w-1/4 mb-4 bg-[#282828]" />
-              <Skeleton className="h-5 w-3/4 mb-3 bg-[#282828]" />
-              <Skeleton className="h-3 w-1/2 bg-[#282828]" />
+            <div key={i} className="card-clean rounded-xl p-5 h-[120px]">
+              <Skeleton className="h-4 w-1/4 mb-4 skeleton-pulse" />
+              <Skeleton className="h-5 w-3/4 mb-3 skeleton-pulse" />
+              <Skeleton className="h-3 w-1/2 skeleton-pulse" />
             </div>
           ))
         ) : tickets.length === 0 ? (
-          <div className="bg-[#181818] border border-[#282828] rounded-xl p-12 text-center">
-            <p className="text-[#666666]">Tidak ada tiket ditemukan</p>
+          <div className="card-clean rounded-xl p-12 text-center">
+            <p className="th-text-m">Tidak ada tiket ditemukan</p>
           </div>
         ) : (
           tickets.map((ticket) => {
@@ -131,12 +132,12 @@ export default function TiketSayaPage() {
             return (
               <div
                 key={ticket.id}
-                className="bg-[#181818] border border-[#282828] rounded-xl p-4 cursor-pointer transition-colors hover:bg-[#1f1f1f] group"
+                className="card-hover rounded-xl p-4 group cursor-pointer"
                 onClick={() => router.push(`/mahasiswa/tiket/${ticket.id}`)}
               >
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-[10px] text-[#666666] tracking-wider">
+                    <span className="font-mono text-[10px] th-text-m tracking-wider">
                       {ticket.ticket_code}
                     </span>
                     <div className="flex gap-1.5">
@@ -150,20 +151,20 @@ export default function TiketSayaPage() {
                   </div>
                   
                   <div>
-                    <h3 className="text-base font-semibold text-white mb-1 group-hover:text-[#1ed760] transition-colors">
+                    <h3 className="text-base font-semibold th-text mb-1 group-hover:text-[#1ed760] transition-colors truncate">
                       {ticket.title}
                     </h3>
-                    <div className="flex items-center gap-2 text-[11px] text-[#666666]">
+                    <div className="flex items-center gap-2 text-[11px] th-text-m">
                       <span>{ticket.category}</span>
-                      <span className="w-1 h-1 rounded-full bg-[#333333]" />
+                      <span className="w-1 h-1 rounded-full bg-th-border" style={{ backgroundColor: 'var(--th-border)' }} />
                       <span>{timeAgo(ticket.created_at)}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 mt-1 border-t border-[#222222]">
+                  <div className="flex items-center justify-between pt-3 mt-1 border-t th-border" style={{ borderTopColor: 'var(--th-border)' }}>
                     <div className="flex flex-col">
-                      <p className="text-[9px] text-[#4d4d4d] uppercase font-bold tracking-tight">Terakhir Diperbarui</p>
-                      <p className="text-[11px] text-[#b3b3b3]">{formatDate(ticket.updated_at)}</p>
+                      <p className="text-[9px] th-text-f uppercase font-bold tracking-tight">Terakhir Diperbarui</p>
+                      <p className="text-[11px] th-text-2">{formatDate(ticket.updated_at)}</p>
                     </div>
                     <div className="flex items-center gap-2 text-[#1ed760] text-[11px] font-semibold uppercase tracking-wider">
                       <span>Detail</span>
@@ -178,33 +179,33 @@ export default function TiketSayaPage() {
       </div>
 
       {/* Ticket List - Desktop View (Table) */}
-      <div className="hidden md:block bg-[#181818] border border-[#282828] rounded-xl overflow-hidden">
+      <div className="hidden md:block card-clean rounded-xl overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-[#1f1f1f] border-b border-[#282828]">
-              <th className="px-6 py-4 text-[10px] font-bold text-[#666666] uppercase tracking-widest w-[120px]">Kode</th>
-              <th className="px-6 py-4 text-[10px] font-bold text-[#666666] uppercase tracking-widest">Judul Laporan</th>
-              <th className="px-6 py-4 text-[10px] font-bold text-[#666666] uppercase tracking-widest w-[120px]">Kategori</th>
-              <th className="px-6 py-4 text-[10px] font-bold text-[#666666] uppercase tracking-widest w-[120px]">Prioritas</th>
-              <th className="px-6 py-4 text-[10px] font-bold text-[#666666] uppercase tracking-widest w-[140px]">Status</th>
-              <th className="px-6 py-4 text-[10px] font-bold text-[#666666] uppercase tracking-widest text-right">Aksi</th>
+            <tr className="border-b" style={{ background: 'var(--th-raised)', borderBottomColor: 'var(--th-border)' }}>
+              <th className="px-6 py-4 text-[10px] font-bold th-text-m uppercase tracking-widest w-[120px]">Kode</th>
+              <th className="px-6 py-4 text-[10px] font-bold th-text-m uppercase tracking-widest">Judul Laporan</th>
+              <th className="px-6 py-4 text-[10px] font-bold th-text-m uppercase tracking-widest w-[120px]">Kategori</th>
+              <th className="px-6 py-4 text-[10px] font-bold th-text-m uppercase tracking-widest w-[120px]">Prioritas</th>
+              <th className="px-6 py-4 text-[10px] font-bold th-text-m uppercase tracking-widest w-[140px]">Status</th>
+              <th className="px-6 py-4 text-[10px] font-bold th-text-m uppercase tracking-widest text-right">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#222222]">
+          <tbody className="divide-y" style={{ divideColor: 'var(--th-border)' }}>
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <tr key={i}>
-                  <td className="px-6 py-4"><Skeleton className="h-4 w-16 bg-[#282828]" /></td>
-                  <td className="px-6 py-4"><Skeleton className="h-4 w-64 bg-[#282828]" /></td>
-                  <td className="px-6 py-4"><Skeleton className="h-4 w-20 bg-[#282828]" /></td>
-                  <td className="px-6 py-4"><Skeleton className="h-6 w-16 bg-[#282828]" /></td>
-                  <td className="px-6 py-4"><Skeleton className="h-6 w-20 bg-[#282828]" /></td>
-                  <td className="px-6 py-4 text-right"><Skeleton className="h-8 w-8 ml-auto bg-[#282828]" /></td>
+                <tr key={i} style={{ borderBottomColor: 'var(--th-border)' }}>
+                  <td className="px-6 py-4"><Skeleton className="h-4 w-16 skeleton-pulse" /></td>
+                  <td className="px-6 py-4"><Skeleton className="h-4 w-64 skeleton-pulse" /></td>
+                  <td className="px-6 py-4"><Skeleton className="h-4 w-20 skeleton-pulse" /></td>
+                  <td className="px-6 py-4"><Skeleton className="h-6 w-16 skeleton-pulse" /></td>
+                  <td className="px-6 py-4"><Skeleton className="h-6 w-20 skeleton-pulse" /></td>
+                  <td className="px-6 py-4 text-right"><Skeleton className="h-8 w-8 ml-auto skeleton-pulse" /></td>
                 </tr>
               ))
             ) : tickets.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-[#666666]">Tidak ada tiket ditemukan</td>
+                <td colSpan={6} className="px-6 py-12 text-center th-text-m">Tidak ada tiket ditemukan</td>
               </tr>
             ) : (
               tickets.map((ticket) => {
@@ -213,18 +214,21 @@ export default function TiketSayaPage() {
                 return (
                   <tr 
                     key={ticket.id} 
-                    className="hover:bg-[#1f1f1f] transition-colors cursor-pointer group"
+                    className="transition-colors cursor-pointer group"
+                    style={{ borderBottomColor: 'var(--th-border)' }}
                     onClick={() => router.push(`/mahasiswa/tiket/${ticket.id}`)}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--th-hover)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                   >
-                    <td className="px-6 py-4 font-mono text-xs text-[#666666]">{ticket.ticket_code}</td>
+                    <td className="px-6 py-4 font-mono text-xs th-text-m">{ticket.ticket_code}</td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-white group-hover:text-[#1ed760] transition-colors line-clamp-1">{ticket.title}</span>
-                        <span className="text-[10px] text-[#666666] mt-0.5">{timeAgo(ticket.created_at)}</span>
+                        <span className="text-sm font-semibold th-text group-hover:text-[#1ed760] transition-colors line-clamp-1">{ticket.title}</span>
+                        <span className="text-[10px] th-text-m mt-0.5">{timeAgo(ticket.created_at)}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[11px] text-[#b3b3b3]">{ticket.category}</span>
+                      <span className="text-[11px] th-text-2">{ticket.category}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${priorityColor.bg} ${priorityColor.text} border ${priorityColor.border}`}>
@@ -237,7 +241,12 @@ export default function TiketSayaPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="p-2 rounded-lg bg-[#282828] text-[#b3b3b3] group-hover:text-[#1ed760] transition-colors">
+                      <button 
+                        className="p-2 rounded-lg th-text-2 transition-colors"
+                        style={{ background: 'var(--th-raised)' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = '#1ed760'; e.currentTarget.style.background = 'rgba(30, 215, 96, 0.1)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--th-text-secondary)'; e.currentTarget.style.background = 'var(--th-raised)'; }}
+                      >
                         <Eye className="h-4 w-4" />
                       </button>
                     </td>
@@ -253,19 +262,21 @@ export default function TiketSayaPage() {
       {lastPage > 1 && (
         <div className="flex items-center justify-center gap-4 mt-10">
           <button
-            className="p-2 rounded-lg bg-[#181818] border border-[#333333] text-[#b3b3b3] hover:text-white disabled:opacity-20"
+            className="p-2 rounded-lg border th-text-2 hover:th-text disabled:opacity-20 transition-colors"
+            style={{ background: 'var(--th-base)', borderColor: 'var(--th-border)' }}
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((p) => p - 1)}
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           
-          <span className="text-xs text-[#666666] font-medium uppercase tracking-widest">
+          <span className="text-xs th-text-m font-medium uppercase tracking-widest">
             Halaman {currentPage} / {lastPage}
           </span>
           
           <button
-            className="p-2 rounded-lg bg-[#181818] border border-[#333333] text-[#b3b3b3] hover:text-white disabled:opacity-20"
+            className="p-2 rounded-lg border th-text-2 hover:th-text disabled:opacity-20 transition-colors"
+            style={{ background: 'var(--th-base)', borderColor: 'var(--th-border)' }}
             disabled={currentPage === lastPage}
             onClick={() => setCurrentPage((p) => p + 1)}
           >

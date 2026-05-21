@@ -34,27 +34,27 @@ const typeConfig: Record<
   },
   ticket_status_changed: {
     icon: <ShieldCheck className="w-4 h-4" />,
-    color: "text-blue-400",
+    color: "text-blue-500",
     bg: "bg-blue-500/10",
   },
   chat_received: {
     icon: <MessageSquare className="w-4 h-4" />,
-    color: "text-purple-400",
+    color: "text-purple-500",
     bg: "bg-purple-500/10",
   },
   profile_updated: {
     icon: <User className="w-4 h-4" />,
-    color: "text-amber-400",
+    color: "text-amber-500",
     bg: "bg-amber-500/10",
   },
   password_changed: {
     icon: <Lock className="w-4 h-4" />,
-    color: "text-red-400",
+    color: "text-red-500",
     bg: "bg-red-500/10",
   },
   avatar_updated: {
     icon: <Camera className="w-4 h-4" />,
-    color: "text-pink-400",
+    color: "text-pink-500",
     bg: "bg-pink-500/10",
   },
 };
@@ -85,8 +85,8 @@ function NotifCard({
     <div
       className={`flex gap-3 p-4 rounded-xl border transition-all group ${
         isUnread
-          ? "border-[#1ed760]/20 bg-[#1ed760]/5"
-          : "border-[#282828] bg-[#1a1a1a]"
+          ? "border-[#1ed760]/30 bg-[#1ed760]/5 shadow-sm"
+          : "th-border bg-th-base"
       }`}
     >
       {/* Icon */}
@@ -99,24 +99,24 @@ function NotifCard({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <p className={`text-sm font-semibold leading-tight ${isUnread ? "text-white" : "text-gray-300"}`}>
+          <p className={`text-sm font-semibold leading-tight ${isUnread ? "th-text" : "th-text-2"}`}>
             {notif.title}
             {isUnread && (
               <span className="ml-2 inline-block w-2 h-2 rounded-full bg-[#1ed760] align-middle" />
             )}
           </p>
-          <span className="text-[11px] text-gray-500 whitespace-nowrap flex-shrink-0">{timeAgo}</span>
+          <span className="text-[11px] th-text-m whitespace-nowrap flex-shrink-0 font-medium">{timeAgo}</span>
         </div>
-        <p className="text-xs text-gray-400 mt-0.5 leading-relaxed line-clamp-2">{notif.body}</p>
+        <p className="text-xs th-text-2 mt-1 leading-relaxed line-clamp-2">{notif.body}</p>
       </div>
 
       {/* Actions */}
-      <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+      <div className="flex flex-col gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
         {isUnread && (
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRead(notif.id); }}
             title="Tandai dibaca"
-            className="p-1 text-gray-500 hover:text-[#1ed760] transition-colors"
+            className="p-1.5 th-text-m hover:text-[#1ed760] bg-th-raised hover:bg-[#1ed760]/10 rounded-md transition-colors"
           >
             <CheckCheck className="w-3.5 h-3.5" />
           </button>
@@ -124,7 +124,7 @@ function NotifCard({
         <button
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(notif.id); }}
           title="Hapus"
-          className="p-1 text-gray-500 hover:text-red-400 transition-colors"
+          className="p-1.5 th-text-m hover:text-red-500 bg-th-raised hover:bg-red-500/10 rounded-md transition-colors"
         >
           <X className="w-3.5 h-3.5" />
         </button>
@@ -192,11 +192,11 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="container-mobile py-8 max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-bold th-text tracking-tight flex items-center gap-2">
             <Bell className="w-6 h-6 text-[#1ed760]" />
             Notifikasi
             {unreadCount > 0 && (
@@ -205,17 +205,17 @@ export default function NotificationsPage() {
               </span>
             )}
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm th-text-2 mt-1">
             {unreadCount > 0 ? `${unreadCount} notifikasi belum dibaca` : "Semua notifikasi sudah dibaca"}
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={handleRefresh}
-            className="border-[#333] text-gray-400 hover:text-white bg-transparent hover:bg-[#1f1f1f]"
+            className="border-th-border-s th-text-2 hover:th-text bg-th-base hover:bg-th-hover"
           >
             <RefreshCw className={`w-4 h-4 mr-1.5 ${isRefreshing ? "animate-spin" : ""}`} />
             Refresh
@@ -225,7 +225,7 @@ export default function NotificationsPage() {
               size="sm"
               variant="outline"
               onClick={handleMarkAllRead}
-              className="border-[#1ed760]/30 text-[#1ed760] hover:bg-[#1ed760]/10 bg-transparent"
+              className="border-[#1ed760]/30 text-[#1ed760] hover:bg-[#1ed760]/10 bg-th-base"
             >
               <CheckCheck className="w-4 h-4 mr-1.5" />
               Baca Semua
@@ -236,7 +236,7 @@ export default function NotificationsPage() {
               size="sm"
               variant="outline"
               onClick={handleClearRead}
-              className="border-red-500/20 text-red-400 hover:bg-red-500/10 bg-transparent"
+              className="border-red-500/30 text-red-500 hover:bg-red-500/10 bg-th-base"
             >
               <Trash2 className="w-4 h-4 mr-1.5" />
               Hapus Dibaca
@@ -246,7 +246,7 @@ export default function NotificationsPage() {
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
         {FILTERS.map((f) => {
           const count =
             f.value === "unread"
@@ -259,17 +259,17 @@ export default function NotificationsPage() {
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}
-              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 filter === f.value
-                  ? "bg-[#1ed760] text-black"
-                  : "bg-[#1a1a1a] border border-[#282828] text-gray-400 hover:text-white hover:border-[#444]"
+                  ? "bg-[#1ed760] text-black shadow-md"
+                  : "bg-th-base border th-border th-text-2 hover:th-text hover:th-border-s"
               }`}
             >
               {f.label}
               {count > 0 && (
                 <span
                   className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[11px] font-bold ${
-                    filter === f.value ? "bg-black/20" : "bg-[#282828]"
+                    filter === f.value ? "bg-black/20" : "bg-th-raised border th-border-s"
                   }`}
                 >
                   {count}
@@ -281,14 +281,14 @@ export default function NotificationsPage() {
       </div>
 
       {/* List */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-16 h-16 rounded-full bg-[#1a1a1a] border border-[#282828] flex items-center justify-center mb-4">
-              <Bell className="w-7 h-7 text-gray-600" />
+          <div className="flex flex-col items-center justify-center py-16 text-center card-clean rounded-2xl">
+            <div className="w-16 h-16 rounded-full bg-th-raised border th-border flex items-center justify-center mb-4">
+              <Bell className="w-7 h-7 th-text-m" />
             </div>
-            <p className="text-gray-400 font-medium">Tidak ada notifikasi</p>
-            <p className="text-gray-600 text-sm mt-1">
+            <p className="th-text font-bold text-lg mb-1">Tidak ada notifikasi</p>
+            <p className="th-text-2 text-sm">
               {filter === "unread" ? "Semua sudah dibaca 🎉" : "Belum ada notifikasi untuk kategori ini"}
             </p>
           </div>

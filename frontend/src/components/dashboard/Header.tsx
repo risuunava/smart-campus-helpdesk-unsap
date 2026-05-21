@@ -58,30 +58,34 @@ function NotifDropdownItem({
   const inner = (
     <div
       className={`flex gap-2.5 px-3 py-2.5 group relative transition-colors cursor-pointer ${
-        isUnread ? "bg-[#1ed760]/5 hover:bg-[#1ed760]/10" : "hover:bg-[#222]"
+        isUnread ? "bg-[#1ed760]/5 hover:bg-[#1ed760]/10" : ""
       }`}
+      style={!isUnread ? { background: 'transparent' } : undefined}
+      onMouseEnter={(e) => { if (!isUnread) e.currentTarget.style.background = 'var(--th-hover)'; }}
+      onMouseLeave={(e) => { if (!isUnread) e.currentTarget.style.background = 'transparent'; }}
       onClick={() => isUnread && onRead(notif.id)}
     >
       {/* Icon */}
-      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-[#2a2a2a] flex items-center justify-center mt-0.5">
+      <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5" style={{ background: 'var(--th-raised)' }}>
         {typeIcon[notif.type]}
       </div>
 
       {/* Text */}
       <div className="flex-1 min-w-0">
-        <p className={`text-xs font-semibold leading-tight ${isUnread ? "text-white" : "text-gray-300"}`}>
+        <p className="text-xs font-semibold leading-tight" style={{ color: isUnread ? 'var(--th-text-primary)' : 'var(--th-text-secondary)' }}>
           {notif.title}
           {isUnread && (
             <span className="ml-1.5 inline-block w-1.5 h-1.5 rounded-full bg-[#1ed760] align-middle" />
           )}
         </p>
-        <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">{notif.body}</p>
-        <p className="text-[10px] text-gray-600 mt-0.5">{timeAgo}</p>
+        <p className="text-[11px] mt-0.5 line-clamp-1" style={{ color: 'var(--th-text-muted)' }}>{notif.body}</p>
+        <p className="text-[10px] mt-0.5" style={{ color: 'var(--th-text-faint)' }}>{timeAgo}</p>
       </div>
 
       {/* Delete button */}
       <button
-        className="opacity-0 group-hover:opacity-100 flex-shrink-0 p-0.5 text-gray-600 hover:text-red-400 transition-all mt-0.5"
+        className="opacity-0 group-hover:opacity-100 flex-shrink-0 p-0.5 hover:text-red-400 transition-all mt-0.5"
+        style={{ color: 'var(--th-text-faint)' }}
         onClick={(e) => { e.stopPropagation(); onDelete(notif.id); }}
         title="Hapus"
       >
@@ -117,7 +121,10 @@ export function Header() {
   const preview = notifications.slice(0, 6);
 
   return (
-    <header className={`fixed top-0 left-0 ${isCollapsed ? 'lg:left-20' : 'lg:left-64'} right-0 h-16 bg-[#121212]/80 backdrop-blur-md border-b border-[#282828] z-40 px-6 md:px-8 flex items-center justify-end transition-all duration-300 ease-in-out`}>
+    <header 
+      className={`fixed top-0 left-0 ${isCollapsed ? 'lg:left-20' : 'lg:left-64'} right-0 h-16 backdrop-blur-md border-b z-40 px-6 md:px-8 flex items-center justify-end transition-all duration-300 ease-in-out`}
+      style={{ background: 'var(--th-header-bg)', borderColor: 'var(--th-border)' }}
+    >
       <div className="flex items-center gap-3">
 
         {/* ── Bell Dropdown ─────────────────────────────────────── */}
@@ -125,11 +132,14 @@ export function Header() {
           <DropdownMenuTrigger asChild>
             <button
               id="notification-bell"
-              className="relative w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#1f1f1f] transition-colors focus:outline-none"
+              className="relative w-10 h-10 rounded-full flex items-center justify-center transition-colors focus:outline-none"
+              style={{ color: 'var(--th-text-secondary)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--th-text-primary)'; e.currentTarget.style.background = 'var(--th-hover)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--th-text-secondary)'; e.currentTarget.style.background = 'transparent'; }}
             >
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 bg-[#1ed760] text-black text-[10px] font-bold rounded-full flex items-center justify-center px-0.5 border-2 border-[#121212]">
+                <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 bg-[#1ed760] text-black text-[10px] font-bold rounded-full flex items-center justify-center px-0.5 border-2" style={{ borderColor: 'var(--th-header-bg)' }}>
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
@@ -138,13 +148,14 @@ export function Header() {
 
           <DropdownMenuContent
             align="end"
-            className="w-80 bg-[#161616] border-[#2a2a2a] p-0 overflow-hidden shadow-2xl"
+            className="w-80 p-0 overflow-hidden shadow-2xl"
+            style={{ background: 'var(--th-base)', borderColor: 'var(--th-border)' }}
           >
             {/* Header dropdown */}
-            <div className="flex items-center justify-between px-3 py-2.5 border-b border-[#2a2a2a]">
+            <div className="flex items-center justify-between px-3 py-2.5 border-b" style={{ borderColor: 'var(--th-border-subtle)' }}>
               <div className="flex items-center gap-2">
                 <Bell className="w-4 h-4 text-[#1ed760]" />
-                <span className="text-white text-sm font-semibold">Notifikasi</span>
+                <span className="text-sm font-semibold" style={{ color: 'var(--th-text-primary)' }}>Notifikasi</span>
                 {unreadCount > 0 && (
                   <span className="px-1.5 py-0.5 bg-[#1ed760] text-black text-[10px] font-bold rounded-full">
                     {unreadCount}
@@ -163,11 +174,11 @@ export function Header() {
             </div>
 
             {/* Notif list */}
-            <div className="max-h-80 overflow-y-auto">
+            <div className="max-h-80 overflow-y-auto custom-scrollbar">
               {preview.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Bell className="w-8 h-8 text-gray-600 mb-2" />
-                  <p className="text-gray-500 text-sm">Tidak ada notifikasi</p>
+                  <Bell className="w-8 h-8 mb-2" style={{ color: 'var(--th-text-muted)' }} />
+                  <p className="text-sm" style={{ color: 'var(--th-text-secondary)' }}>Tidak ada notifikasi</p>
                 </div>
               ) : (
                 preview.map((n) => (
@@ -183,7 +194,7 @@ export function Header() {
 
             {/* Footer */}
             {notifications.length > 0 && (
-              <div className="border-t border-[#2a2a2a] p-2">
+              <div className="border-t p-2" style={{ borderColor: 'var(--th-border-subtle)' }}>
                 <Link
                   href="/notifications"
                   className="flex items-center justify-center w-full py-1.5 text-xs text-[#1ed760] hover:text-[#1ed760]/80 transition-colors font-medium"
@@ -199,7 +210,7 @@ export function Header() {
         <DropdownMenu>
           <DropdownMenuTrigger className="focus:outline-none ml-1">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-[#1ed760]/20 flex items-center justify-center border border-[#1ed760]/30 hover:border-[#1ed760]/80 transition-colors overflow-hidden">
+              <div className="w-10 h-10 rounded-full bg-[#1ed760]/10 flex items-center justify-center border border-[#1ed760]/30 hover:border-[#1ed760]/80 transition-colors overflow-hidden">
                 {user.avatar_url ? (
                   <Image 
                     src={user.avatar_url} 
@@ -215,27 +226,27 @@ export function Header() {
               </div>
             </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 bg-[#1a1a1a] border-[#333] text-white">
+          <DropdownMenuContent align="end" className="w-56" style={{ background: 'var(--th-base)', borderColor: 'var(--th-border)', color: 'var(--th-text-primary)' }}>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">{user.name}</p>
-                <p className="text-xs leading-none text-gray-400">{user.email}</p>
+                <p className="text-xs leading-none" style={{ color: 'var(--th-text-secondary)' }}>{user.email}</p>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-[#333]" />
-            <DropdownMenuItem asChild className="hover:bg-[#282828] cursor-pointer">
+            <DropdownMenuSeparator style={{ background: 'var(--th-border-subtle)' }} />
+            <DropdownMenuItem asChild className="cursor-pointer" style={{ cursor: 'pointer' }} onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--th-hover)' }} onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}>
               <Link href="/profile" className="flex items-center w-full">
                 <User className="mr-2 h-4 w-4" />
                 <span>Profil</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="hover:bg-[#282828] cursor-pointer">
+            <DropdownMenuItem asChild className="cursor-pointer" style={{ cursor: 'pointer' }} onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--th-hover)' }} onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}>
               <Link href="/settings" className="flex items-center w-full">
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Pengaturan</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="hover:bg-[#282828] cursor-pointer">
+            <DropdownMenuItem asChild className="cursor-pointer" style={{ cursor: 'pointer' }} onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--th-hover)' }} onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}>
               <Link href="/notifications" className="flex items-center w-full">
                 <Bell className="mr-2 h-4 w-4" />
                 <span>Notifikasi</span>
@@ -246,9 +257,11 @@ export function Header() {
                 )}
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-[#333]" />
+            <DropdownMenuSeparator style={{ background: 'var(--th-border-subtle)' }} />
             <DropdownMenuItem 
-              className="text-red-500 hover:text-red-400 hover:bg-red-500/10 cursor-pointer"
+              className="text-red-500 hover:text-red-400 cursor-pointer"
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)' }} 
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
               onClick={logout}
             >
               <LogOut className="mr-2 h-4 w-4" />

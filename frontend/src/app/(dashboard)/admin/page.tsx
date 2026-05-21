@@ -45,7 +45,7 @@ export default function AdminDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#121212]">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-th-page">
         <Loader2 className="h-8 w-8 animate-spin text-[#1ed760]" />
       </div>
     );
@@ -54,17 +54,17 @@ export default function AdminDashboardPage() {
   return (
     <div className="container-mobile py-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white animate-fade-in">
+          <h1 className="text-3xl font-bold th-text animate-fade-in">
             Dashboard Admin
           </h1>
-          <p className="text-[#b3b3b3] mt-1">
+          <p className="th-text-2 mt-1">
             Selamat datang, {user?.name}. Berikut ringkasan tiket hari ini.
           </p>
         </div>
         <button
-          className="btn-gradient px-5 py-2.5 text-sm flex items-center gap-2 uppercase tracking-wider"
+          className="btn-gradient px-5 py-2.5 text-sm flex items-center justify-center gap-2 uppercase tracking-wider"
           onClick={handleExport}
           disabled={isExporting}
         >
@@ -82,7 +82,7 @@ export default function AdminDashboardPage() {
 
       {/* Ticket Table */}
       <div className="mt-8">
-        <h2 className="text-xl font-bold text-white mb-4">
+        <h2 className="text-xl font-bold th-text mb-4">
           Daftar Tiket Terbaru
         </h2>
         <TicketTable />

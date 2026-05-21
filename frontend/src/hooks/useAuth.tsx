@@ -88,9 +88,9 @@ export function AuthProvider({ children, initialUser = null }: { children: React
       // Role-based redirect
       const role = response.data.user.role;
       if (role === 'admin' || role === 'master_admin') {
-        router.push("/admin");
+        window.location.href = "/admin";
       } else {
-        router.push("/mahasiswa");
+        window.location.href = "/mahasiswa";
       }
     } catch (err: any) {
       setError(err.message || "Login failed");

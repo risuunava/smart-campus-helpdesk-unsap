@@ -1,20 +1,27 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { User, Lock, Mail, BookOpen, GraduationCap, Shield, Camera } from "lucide-react";
-import Image from "next/image";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { User, Lock, Mail, BookOpen, GraduationCap, Camera, Sun, Moon, Monitor, Palette, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { AvatarCropModal } from "@/components/ui/AvatarCropModal";
 
+type Tab = "profile" | "appearance" | "security";
+
 export default function SettingsPage() {
   const { user } = useAuth();
   const router = useRouter();
-  
+  const [tab, setTab] = useState<Tab>("profile");
+
   const [profileForm, setProfileForm] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -23,298 +30,311 @@ export default function SettingsPage() {
     study_program: user?.study_program || "",
     semester: user?.semester || "",
   });
-
   const [passwordForm, setPasswordForm] = useState({
     current_password: "",
     password: "",
     password_confirmation: "",
   });
 
-  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
-  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-
-  // Crop modal state
-  const [cropModalOpen, setCropModalOpen] = useState(false);
-  const [cropImageSrc, setCropImageSrc] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [cropOpen, setCropOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
 
   if (!user) return null;
 
-  // Step 1: User picks a file → open crop modal
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    // Reset input so same file can be re-selected
+  // ── handlers ──
+  const pickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
     e.target.value = "";
-
-    const reader = new FileReader();
-    reader.addEventListener("load", () => {
-      if (typeof reader.result === "string") {
-        setCropImageSrc(reader.result);
-        setCropModalOpen(true);
-      }
-    });
-    reader.readAsDataURL(file);
+    const r = new FileReader();
+    r.onload = () => { if (typeof r.result === "string") { setCropSrc(r.result); setCropOpen(true); } };
+    r.readAsDataURL(f);
   };
 
-  // Step 2: Cropped blob → upload
-  const handleCropComplete = async (croppedBlob: Blob) => {
-    setIsUploadingAvatar(true);
+  const onCrop = async (blob: Blob) => {
+    setUploadingAvatar(true);
     try {
-      const croppedFile = new File([croppedBlob], "avatar.jpg", { type: "image/jpeg" });
-      await api.updateAvatar(croppedFile);
-      toast.success("Foto profil berhasil diperbarui!");
-      setCropModalOpen(false);
-      setTimeout(() => router.refresh(), 1000);
-    } catch (error: any) {
-      toast.error(error.message || "Gagal memperbarui foto profil");
-    } finally {
-      setIsUploadingAvatar(false);
-    }
+      await api.updateAvatar(new File([blob], "avatar.jpg", { type: "image/jpeg" }));
+      toast.success("Foto profil diperbarui");
+      setCropOpen(false);
+      setTimeout(() => router.refresh(), 800);
+    } catch (err: any) { toast.error(err.message || "Gagal upload"); }
+    finally { setUploadingAvatar(false); }
   };
 
-  const handleProfileSubmit = async (e: React.FormEvent) => {
+  const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsUpdatingProfile(true);
+    setSavingProfile(true);
     try {
       await api.updateProfile(profileForm);
-      toast.success("Profil berhasil diperbarui");
-      setTimeout(() => router.refresh(), 1000);
-    } catch (error: any) {
-      toast.error(error.message || "Gagal memperbarui profil");
-    } finally {
-      setIsUpdatingProfile(false);
-    }
+      toast.success("Profil disimpan");
+      setTimeout(() => router.refresh(), 800);
+    } catch (err: any) { toast.error(err.message || "Gagal menyimpan"); }
+    finally { setSavingProfile(false); }
   };
 
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
+  const savePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordForm.password !== passwordForm.password_confirmation) {
-      return toast.error("Konfirmasi password tidak sesuai");
-    }
-    setIsUpdatingPassword(true);
+    if (passwordForm.password !== passwordForm.password_confirmation)
+      return toast.error("Konfirmasi password tidak cocok");
+    setSavingPassword(true);
     try {
       await api.updatePassword(passwordForm);
-      toast.success("Password berhasil diperbarui");
+      toast.success("Password diperbarui");
       setPasswordForm({ current_password: "", password: "", password_confirmation: "" });
-    } catch (error: any) {
-      toast.error(error.message || "Gagal memperbarui password");
-    } finally {
-      setIsUpdatingPassword(false);
-    }
+    } catch (err: any) { toast.error(err.message || "Gagal memperbarui"); }
+    finally { setSavingPassword(false); }
   };
 
+  const tabs: { id: Tab; label: string }[] = [
+    { id: "profile", label: "Profil" },
+    { id: "appearance", label: "Tampilan" },
+    { id: "security", label: "Keamanan" },
+  ];
+
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Pengaturan Akun</h1>
-        <p className="text-sm text-gray-400 mt-1">Kelola informasi profil dan keamanan akun Anda</p>
+    <div className="container-mobile py-8 max-w-3xl mx-auto">
+      {/* Header */}
+      <h1 className="text-2xl font-semibold th-text">Pengaturan</h1>
+      <p className="text-sm th-text-2 mt-1 mb-6">Kelola akun, tampilan, dan keamanan.</p>
+
+      {/* Tab nav — simple underline style */}
+      <div className="flex gap-6 border-b mb-8" style={{ borderColor: 'var(--th-border)' }}>
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`pb-3 text-sm font-medium transition-colors relative ${
+              tab === t.id ? "th-text" : "th-text-m hover:th-text"
+            }`}
+          >
+            {t.label}
+            {tab === t.id && (
+              <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#1ed760] rounded-full" />
+            )}
+          </button>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Profile Card */}
-        <div className="bg-[#121212] border border-[#282828] rounded-xl overflow-hidden shadow-lg">
-          <div className="p-6 border-b border-[#282828] bg-[#1a1a1a]">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#1ed760]/10 rounded-lg text-[#1ed760]">
-                <User className="h-5 w-5" />
-              </div>
-              <h2 className="text-lg font-semibold text-white">Informasi Profil</h2>
+      {/* ── PROFIL ── */}
+      {tab === "profile" && (
+        <div className="space-y-8">
+          {/* Avatar row */}
+          <div className="flex items-center gap-5">
+            <div className="relative group">
+              <Avatar className="h-16 w-16 border" style={{ borderColor: 'var(--th-border)' }}>
+                {user.avatar_url ? (
+                  <AvatarImage src={user.avatar_url} alt={user.name} />
+                ) : null}
+                <AvatarFallback style={{ background: 'var(--th-raised)', color: 'var(--th-text-muted)' }}>
+                  {user.name?.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Camera className="h-4 w-4 text-white" />
+              </button>
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={pickFile} disabled={uploadingAvatar} />
             </div>
-          </div>
-          
-          <div className="p-6 border-b border-[#282828]">
-            <div className="flex items-center gap-6">
-              <div className="relative group">
-                <div className="w-24 h-24 rounded-full overflow-hidden bg-[#1a1a1a] border-2 border-[#333] flex items-center justify-center">
-                  {user.avatar_url ? (
-                    <Image 
-                      src={user.avatar_url} 
-                      alt={user.name} 
-                      width={96} 
-                      height={96} 
-                      className="object-cover w-full h-full"
-                      unoptimized
-                    />
-                  ) : (
-                    <User className="w-10 h-10 text-gray-500" />
-                  )}
-                </div>
-                <label 
-                  htmlFor="avatar-upload" 
-                  className={`absolute inset-0 bg-black/60 flex flex-col items-center justify-center rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity ${isUploadingAvatar ? 'opacity-100' : ''}`}
-                >
-                  <Camera className="w-6 h-6 text-white mb-1" />
-                  <span className="text-xs text-white font-medium">
-                    {isUploadingAvatar ? 'Uploading...' : 'Ubah Foto'}
-                  </span>
-                </label>
-                <input 
-                  ref={fileInputRef}
-                  id="avatar-upload" 
-                  type="file" 
-                  accept="image/*" 
-                  className="hidden" 
-                  onChange={handleAvatarChange}
-                  disabled={isUploadingAvatar}
-                />
-              </div>
-              <div>
-                <h3 className="text-white font-medium">Foto Profil</h3>
-                <p className="text-sm text-gray-400 mt-1">Disarankan format JPG, PNG atau WebP. Maks 2MB.</p>
-              </div>
+            <div>
+              <p className="text-sm font-medium th-text">{user.name}</p>
+              <p className="text-xs th-text-m">{user.email}</p>
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="text-xs text-[#1ed760] hover:underline mt-1 font-medium"
+              >
+                Ganti foto
+              </button>
             </div>
           </div>
 
-          <form onSubmit={handleProfileSubmit} className="p-6 space-y-5">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-400">Nama Lengkap</label>
-              <Input 
+          <Separator style={{ background: 'var(--th-border)' }} />
+
+          {/* Form */}
+          <form onSubmit={saveProfile} className="space-y-5">
+            <Field label="Nama" required>
+              <Input
                 value={profileForm.name}
                 onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                className="bg-[#1a1a1a] border-[#333] text-white focus:border-[#1ed760] transition-colors"
+                className="input-focus h-10"
                 required
               />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-400">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Input 
-                  type="email"
-                  value={profileForm.email}
-                  onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                  className="bg-[#1a1a1a] border-[#333] text-white focus:border-[#1ed760] pl-10 transition-colors"
-                  required
-                />
-              </div>
-            </div>
+            </Field>
 
-            {user.role === 'mahasiswa' && (
+            <Field label="Email" required>
+              <Input
+                type="email"
+                value={profileForm.email}
+                onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                className="input-focus h-10"
+                required
+              />
+            </Field>
+
+            {user.role === "mahasiswa" && (
               <>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-400">NIM</label>
-                  <Input 
+                <Field label="NIM">
+                  <Input
                     value={profileForm.nim}
                     onChange={(e) => setProfileForm({ ...profileForm, nim: e.target.value })}
-                    className="bg-[#1a1a1a] border-[#333] text-white focus:border-[#1ed760] transition-colors"
+                    className="input-focus h-10"
                   />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-400">Fakultas</label>
-                    <div className="relative">
-                      <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                      <Input 
-                        value={profileForm.faculty}
-                        onChange={(e) => setProfileForm({ ...profileForm, faculty: e.target.value })}
-                        className="bg-[#1a1a1a] border-[#333] text-white focus:border-[#1ed760] pl-10 transition-colors"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-400">Program Studi</label>
-                    <div className="relative">
-                      <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                      <Input 
-                        value={profileForm.study_program}
-                        onChange={(e) => setProfileForm({ ...profileForm, study_program: e.target.value })}
-                        className="bg-[#1a1a1a] border-[#333] text-white focus:border-[#1ed760] pl-10 transition-colors"
-                      />
-                    </div>
-                  </div>
+                </Field>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <Field label="Fakultas">
+                    <Input
+                      value={profileForm.faculty}
+                      onChange={(e) => setProfileForm({ ...profileForm, faculty: e.target.value })}
+                      className="input-focus h-10"
+                    />
+                  </Field>
+                  <Field label="Program Studi">
+                    <Input
+                      value={profileForm.study_program}
+                      onChange={(e) => setProfileForm({ ...profileForm, study_program: e.target.value })}
+                      className="input-focus h-10"
+                    />
+                  </Field>
                 </div>
               </>
             )}
 
-            <Button 
-              type="submit" 
-              disabled={isUpdatingProfile}
-              className="w-full bg-[#1ed760] hover:bg-[#1ed760]/90 text-black font-semibold rounded-lg mt-4"
-            >
-              {isUpdatingProfile ? "Menyimpan..." : "Simpan Perubahan Profil"}
-            </Button>
+            <div className="flex justify-end pt-2">
+              <Button type="submit" disabled={savingProfile} className="btn-gradient h-9 px-6 text-sm">
+                {savingProfile ? "Menyimpan…" : "Simpan"}
+              </Button>
+            </div>
           </form>
         </div>
+      )}
 
-        {/* Security Card */}
-        <div className="bg-[#121212] border border-[#282828] rounded-xl overflow-hidden shadow-lg h-fit">
-          <div className="p-6 border-b border-[#282828] bg-[#1a1a1a]">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
-                <Shield className="h-5 w-5" />
-              </div>
-              <h2 className="text-lg font-semibold text-white">Keamanan</h2>
-            </div>
+      {/* ── TAMPILAN ── */}
+      {tab === "appearance" && <AppearanceTab />}
+
+      {/* ── KEAMANAN ── */}
+      {tab === "security" && (
+        <form onSubmit={savePassword} className="space-y-5 max-w-md">
+          <p className="text-sm th-text-2 mb-2">Perbarui kata sandi akun Anda.</p>
+
+          <Field label="Password saat ini" required>
+            <Input
+              type="password"
+              value={passwordForm.current_password}
+              onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
+              className="input-focus h-10"
+              required
+            />
+          </Field>
+
+          <Field label="Password baru" required>
+            <Input
+              type="password"
+              value={passwordForm.password}
+              onChange={(e) => setPasswordForm({ ...passwordForm, password: e.target.value })}
+              className="input-focus h-10"
+              required
+              minLength={6}
+            />
+          </Field>
+
+          <Field label="Konfirmasi password baru" required>
+            <Input
+              type="password"
+              value={passwordForm.password_confirmation}
+              onChange={(e) => setPasswordForm({ ...passwordForm, password_confirmation: e.target.value })}
+              className="input-focus h-10"
+              required
+              minLength={6}
+            />
+          </Field>
+
+          <div className="flex justify-end pt-2">
+            <Button type="submit" disabled={savingPassword} className="btn-gradient h-9 px-6 text-sm">
+              {savingPassword ? "Memperbarui…" : "Perbarui password"}
+            </Button>
           </div>
-          
-          <form onSubmit={handlePasswordSubmit} className="p-6 space-y-5">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-400">Password Saat Ini</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Input 
-                  type="password"
-                  value={passwordForm.current_password}
-                  onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
-                  className="bg-[#1a1a1a] border-[#333] text-white focus:border-blue-500 pl-10 transition-colors"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-400">Password Baru</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Input 
-                  type="password"
-                  value={passwordForm.password}
-                  onChange={(e) => setPasswordForm({ ...passwordForm, password: e.target.value })}
-                  className="bg-[#1a1a1a] border-[#333] text-white focus:border-blue-500 pl-10 transition-colors"
-                  required
-                  minLength={6}
-                />
-              </div>
-            </div>
+        </form>
+      )}
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-400">Konfirmasi Password Baru</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Input 
-                  type="password"
-                  value={passwordForm.password_confirmation}
-                  onChange={(e) => setPasswordForm({ ...passwordForm, password_confirmation: e.target.value })}
-                  className="bg-[#1a1a1a] border-[#333] text-white focus:border-blue-500 pl-10 transition-colors"
-                  required
-                  minLength={6}
-                />
-              </div>
-            </div>
-
-            <Button 
-              type="submit" 
-              disabled={isUpdatingPassword}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg mt-4"
-            >
-              {isUpdatingPassword ? "Memperbarui..." : "Perbarui Password"}
-            </Button>
-          </form>
-        </div>
-      </div>
-
-      {/* Avatar Crop Modal */}
+      {/* Crop Modal */}
       <AvatarCropModal
-        isOpen={cropModalOpen}
-        imageSrc={cropImageSrc}
-        onClose={() => setCropModalOpen(false)}
-        onCropComplete={handleCropComplete}
-        isLoading={isUploadingAvatar}
+        isOpen={cropOpen}
+        imageSrc={cropSrc}
+        onClose={() => setCropOpen(false)}
+        onCropComplete={onCrop}
+        isLoading={uploadingAvatar}
       />
+    </div>
+  );
+}
+
+/* ── reusable field wrapper ── */
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-sm th-text">
+        {label}
+        {required && <span className="text-[#f3727f] ml-0.5">*</span>}
+      </Label>
+      {children}
+    </div>
+  );
+}
+
+/* ── appearance tab (isolated for useTheme mount safety) ── */
+function AppearanceTab() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return <div className="py-12 text-center th-text-m text-sm">Memuat…</div>;
+
+  const options: { value: string; label: string; desc: string; icon: any }[] = [
+    { value: "light", label: "Terang", desc: "Tampilan cerah", icon: Sun },
+    { value: "dark", label: "Gelap", desc: "Lebih nyaman di malam hari", icon: Moon },
+    { value: "system", label: "Sistem", desc: "Ikuti pengaturan perangkat", icon: Monitor },
+  ];
+
+  return (
+    <div className="space-y-4 max-w-md">
+      <p className="text-sm th-text-2 mb-2">Pilih tema tampilan aplikasi.</p>
+
+      <div className="space-y-2">
+        {options.map((o) => {
+          const active = theme === o.value;
+          return (
+            <button
+              key={o.value}
+              onClick={() => setTheme(o.value)}
+              className="w-full flex items-center gap-4 px-4 py-3 rounded-lg border transition-all text-left"
+              style={{
+                background: active ? 'rgba(30,215,96,0.06)' : 'var(--th-base)',
+                borderColor: active ? '#1ed760' : 'var(--th-border)',
+              }}
+            >
+              <o.icon className={`h-5 w-5 shrink-0 ${active ? "text-[#1ed760]" : "th-text-m"}`} />
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium ${active ? "text-[#1ed760]" : "th-text"}`}>{o.label}</p>
+                <p className="text-xs th-text-m">{o.desc}</p>
+              </div>
+              {/* radio dot */}
+              <div
+                className="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
+                style={{ borderColor: active ? '#1ed760' : 'var(--th-text-faint)' }}
+              >
+                {active && <div className="w-2 h-2 rounded-full bg-[#1ed760]" />}
+              </div>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -8,7 +8,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   const { isCollapsed } = useSidebar();
   
   return (
-    <div className="min-h-screen bg-[#121212] overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden" style={{ background: 'var(--th-page)' }}>
       <Sidebar />
       <Header />
       <main className={`${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'} min-h-screen pt-16 transition-all duration-300 ease-in-out`}>

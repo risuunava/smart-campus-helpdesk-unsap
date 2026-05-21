@@ -72,26 +72,26 @@ export function StatsCards() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {isLoading
         ? Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-[#181818] border border-[#282828] rounded-xl p-5">
-              <Skeleton className="h-4 w-24 bg-[#282828] mb-4" />
-              <Skeleton className="h-8 w-16 bg-[#282828] mb-2" />
-              <Skeleton className="h-3 w-32 bg-[#282828]" />
+            <div key={i} className="card-clean rounded-xl p-5 skeleton-pulse">
+              <Skeleton className="h-4 w-24 mb-4" />
+              <Skeleton className="h-8 w-16 mb-2" />
+              <Skeleton className="h-3 w-32" />
             </div>
           ))
         : cards.map((card, index) => (
-            <div key={index} className="bg-[#181818] border border-[#282828] rounded-xl p-5 transition-all duration-200 hover:bg-[#1f1f1f] hover:border-[#3a3a3a]">
+            <div key={index} className="card-hover rounded-xl p-5 group cursor-default">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold text-[#b3b3b3] uppercase tracking-wider">
+                <p className="text-xs font-semibold th-text-m uppercase tracking-wider">
                   {card.title}
                 </p>
                 <div className={`p-2 rounded-full ${card.bgColor}`}>
                   <card.icon className={`h-4 w-4 ${card.color} ${card.pulse ? "animate-pulse" : ""}`} />
                 </div>
               </div>
-              <p className="text-3xl font-bold text-white">
+              <p className="text-3xl font-bold th-text">
                 {card.value.toLocaleString()}
               </p>
-              <p className="text-xs text-[#666666] mt-1">
+              <p className="text-xs th-text-m mt-1">
                 {card.description}
               </p>
             </div>

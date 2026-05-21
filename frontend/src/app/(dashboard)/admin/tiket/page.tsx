@@ -21,7 +21,7 @@ export default function AdminTicketsPage() {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#121212]">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-th-page">
         <Loader2 className="h-8 w-8 animate-spin text-[#1ed760]" />
       </div>
     );
@@ -31,16 +31,16 @@ export default function AdminTicketsPage() {
     <div className="container-mobile py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white animate-fade-in">
+        <h1 className="text-3xl font-bold th-text animate-fade-in">
           Semua Tiket
         </h1>
-        <p className="text-[#b3b3b3] mt-1">
+        <p className="th-text-2 mt-1">
           Daftar seluruh laporan dan keluhan yang masuk ke sistem.
         </p>
       </div>
 
       {/* Ticket Table */}
-      <div className="bg-[#181818] border border-[#282828] rounded-xl p-4">
+      <div className="card-clean rounded-xl p-4 md:p-6">
         <TicketTable />
       </div>
     </div>
