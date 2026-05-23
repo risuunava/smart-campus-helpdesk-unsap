@@ -10,10 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Lock, Mail, BookOpen, GraduationCap, Camera, Sun, Moon, Monitor, Palette, Shield } from "lucide-react";
+import { User, Lock, Mail, BookOpen, GraduationCap, Camera, Sun, Moon, Monitor, Palette, Shield, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { AvatarCropModal } from "@/components/ui/AvatarCropModal";
+import { SuccessDialog } from "@/components/ui/SuccessDialog";
 
 type Tab = "profile" | "appearance" | "security";
 
@@ -43,6 +44,23 @@ export default function SettingsPage() {
   const [cropSrc, setCropSrc] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Password visibility states
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Success Pop-up states
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [successData, setSuccessData] = useState<{
+    title: string;
+    description: string;
+    type: "profile" | "password" | "avatar";
+  }>({
+    title: "",
+    description: "",
+    type: "profile",
+  });
+
   if (!user) return null;
 
   // ── handlers ──
@@ -59,9 +77,14 @@ export default function SettingsPage() {
     setUploadingAvatar(true);
     try {
       await api.updateAvatar(new File([blob], "avatar.jpg", { type: "image/jpeg" }));
-      toast.success("Foto profil diperbarui");
       setCropOpen(false);
-      setTimeout(() => router.refresh(), 800);
+      setSuccessData({
+        title: "Foto Profil Diperbarui!",
+        description: "Foto profil baru Anda telah berhasil diperbarui.",
+        type: "avatar",
+      });
+      setSuccessOpen(true);
+      router.refresh();
     } catch (err: any) { toast.error(err.message || "Gagal upload"); }
     finally { setUploadingAvatar(false); }
   };
@@ -71,8 +94,13 @@ export default function SettingsPage() {
     setSavingProfile(true);
     try {
       await api.updateProfile(profileForm);
-      toast.success("Profil disimpan");
-      setTimeout(() => router.refresh(), 800);
+      setSuccessData({
+        title: "Profil Berhasil Diubah!",
+        description: "Informasi profil Anda telah berhasil diperbarui.",
+        type: "profile",
+      });
+      setSuccessOpen(true);
+      router.refresh();
     } catch (err: any) { toast.error(err.message || "Gagal menyimpan"); }
     finally { setSavingProfile(false); }
   };
@@ -84,8 +112,16 @@ export default function SettingsPage() {
     setSavingPassword(true);
     try {
       await api.updatePassword(passwordForm);
-      toast.success("Password diperbarui");
+      setSuccessData({
+        title: "Kata Sandi Diperbarui!",
+        description: "Kata sandi Anda telah berhasil diubah. Gunakan kata sandi baru saat Anda masuk kembali.",
+        type: "password",
+      });
+      setSuccessOpen(true);
       setPasswordForm({ current_password: "", password: "", password_confirmation: "" });
+      setShowCurrentPassword(false);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
     } catch (err: any) { toast.error(err.message || "Gagal memperbarui"); }
     finally { setSavingPassword(false); }
   };
@@ -224,35 +260,62 @@ export default function SettingsPage() {
           <p className="text-sm th-text-2 mb-2">Perbarui kata sandi akun Anda.</p>
 
           <Field label="Password saat ini" required>
-            <Input
-              type="password"
-              value={passwordForm.current_password}
-              onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
-              className="input-focus h-10"
-              required
-            />
+            <div className="relative">
+              <Input
+                type={showCurrentPassword ? "text" : "password"}
+                value={passwordForm.current_password}
+                onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
+                className="input-focus h-10 pr-10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-th-text-m hover:text-th-text transition-colors cursor-pointer focus:outline-none"
+              >
+                {showCurrentPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+              </button>
+            </div>
           </Field>
 
           <Field label="Password baru" required>
-            <Input
-              type="password"
-              value={passwordForm.password}
-              onChange={(e) => setPasswordForm({ ...passwordForm, password: e.target.value })}
-              className="input-focus h-10"
-              required
-              minLength={6}
-            />
+            <div className="relative">
+              <Input
+                type={showNewPassword ? "text" : "password"}
+                value={passwordForm.password}
+                onChange={(e) => setPasswordForm({ ...passwordForm, password: e.target.value })}
+                className="input-focus h-10 pr-10"
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-th-text-m hover:text-th-text transition-colors cursor-pointer focus:outline-none"
+              >
+                {showNewPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+              </button>
+            </div>
           </Field>
 
           <Field label="Konfirmasi password baru" required>
-            <Input
-              type="password"
-              value={passwordForm.password_confirmation}
-              onChange={(e) => setPasswordForm({ ...passwordForm, password_confirmation: e.target.value })}
-              className="input-focus h-10"
-              required
-              minLength={6}
-            />
+            <div className="relative">
+              <Input
+                type={showConfirmPassword ? "text" : "password"}
+                value={passwordForm.password_confirmation}
+                onChange={(e) => setPasswordForm({ ...passwordForm, password_confirmation: e.target.value })}
+                className="input-focus h-10 pr-10"
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-th-text-m hover:text-th-text transition-colors cursor-pointer focus:outline-none"
+              >
+                {showConfirmPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+              </button>
+            </div>
           </Field>
 
           <div className="flex justify-end pt-2">
@@ -270,6 +333,15 @@ export default function SettingsPage() {
         onClose={() => setCropOpen(false)}
         onCropComplete={onCrop}
         isLoading={uploadingAvatar}
+      />
+
+      {/* Success Dialog Popup */}
+      <SuccessDialog
+        isOpen={successOpen}
+        onClose={() => setSuccessOpen(false)}
+        title={successData.title}
+        description={successData.description}
+        type={successData.type}
       />
     </div>
   );
