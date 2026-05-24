@@ -4,7 +4,7 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: unsap_backend
     ports:
       - "8000:8000"
@@ -17,7 +17,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: unsap_frontend
     ports:
       - "3000:3000"
@@ -33,7 +33,7 @@ services:
   ml-service:
     build:
       context: ./ml-service
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: unsap_ml_service
     ports:
       - "5000:5000"
