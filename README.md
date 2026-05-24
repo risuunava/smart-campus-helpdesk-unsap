@@ -144,13 +144,40 @@ Sistem ini telah dikembangkan dengan arsitektur penuh (full-stack ecosystem) yan
 
 ## Panduan Instalasi & Setup Lokal
 
-### Prasyarat Sistem
+### Opsi 1: Menjalankan dengan Docker (Rekomendasi & Paling Mudah)
+Proyek ini sudah dilengkapi dengan konfigurasi Docker Compose untuk menjalankan semua layanan (Frontend, Backend, dan ML-Service) secara bersamaan tanpa perlu menginstal dependensi (Node, PHP, Python) secara manual di sistem Anda.
+
+**Prasyarat:**
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) sudah terinstal dan berjalan.
+
+**Langkah-langkah:**
+1. Kloning repositori:
+   ```bash
+   git clone https://github.com/risuunava/smart-campus-helpdesk-unsap.git
+   cd smart-campus-helpdesk-unsap
+   ```
+2. Jalankan semua layanan di latar belakang:
+   ```bash
+   docker-compose up -d
+   ```
+3. Akses aplikasi:
+   - **Frontend (Next.js)**: http://localhost:3000
+   - **Backend API (Laravel)**: http://localhost:8000
+   - **ML-Service (FastAPI)**: http://localhost:5000
+
+Untuk mematikan layanan, cukup jalankan: `docker-compose down`
+
+---
+
+### Opsi 2: Instalasi Manual
+
+#### Prasyarat Sistem
 - Node.js (versi >= 18)
 - PHP (versi >= 8.2) & Composer
 - Python (versi >= 3.10) & pip
 - PostgreSQL / Akun Supabase aktif
 
-### 1. Kloning Repositori
+#### 1. Kloning Repositori
 ```bash
 git clone https://github.com/risuunava/smart-campus-helpdesk-unsap.git
 cd smart-campus-helpdesk-unsap
