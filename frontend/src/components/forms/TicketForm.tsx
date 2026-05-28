@@ -234,11 +234,11 @@ export function TicketForm() {
                     <FormControl>
                       <Input
                         placeholder="Contoh: AC di Ruang 301 tidak berfungsi"
-                        className="input-focus th-text"
+                        className="input-focus th-text placeholder:text-[var(--th-text-muted)]"
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription className="th-text-m">
+                    <FormDescription className="text-xs th-text-f">
                       Minimal 10 karakter. Jelaskan secara singkat masalah Anda.
                     </FormDescription>
                     <FormMessage className="text-[#f3727f]" />
@@ -256,11 +256,11 @@ export function TicketForm() {
                     <FormControl>
                       <Textarea
                         placeholder="Jelaskan masalah Anda secara detail. Sertakan informasi seperti lokasi, waktu kejadian, dan dampak yang ditimbulkan."
-                        className="input-focus min-h-[150px] th-text"
+                        className="input-focus min-h-[150px] th-text placeholder:text-[var(--th-text-muted)] placeholder:text-[13px]"
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription className="th-text-m">
+                    <FormDescription className="text-xs th-text-f">
                       Minimal 20 karakter. Maksimal 5000 karakter.
                     </FormDescription>
                     <FormMessage className="text-[#f3727f]" />
@@ -304,7 +304,7 @@ export function TicketForm() {
                     {attachmentError}
                   </p>
                 )}
-                <p className="text-sm th-text-m">
+                <p className="text-xs th-text-f">
                   Format: JPG, PNG, atau PDF. Maksimal 2MB.
                 </p>
               </div>
@@ -319,7 +319,7 @@ export function TicketForm() {
                       <FormLabel className="text-base th-text">
                         Lapor sebagai Anonim
                       </FormLabel>
-                      <FormDescription className="th-text-m mt-1">
+                      <FormDescription className="text-xs th-text-f mt-1">
                         Identitas Anda akan disamarkan dari admin biasa. Hanya
                         Master Admin yang dapat melihat identitas asli.
                       </FormDescription>
@@ -363,7 +363,7 @@ export function TicketForm() {
               </div>
 
               {/* Rate Limit Info */}
-              <p className="text-xs th-text-m text-center">
+              <p className="text-xs th-text-f text-center">
                 Maksimal 3 laporan per hari per mahasiswa.
               </p>
             </form>
