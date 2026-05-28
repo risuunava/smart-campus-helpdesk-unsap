@@ -48,11 +48,15 @@ class ForgotPasswordController extends Controller
         $frontendUrl = rtrim(config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000')), '/');
         $resetLink   = "{$frontendUrl}/reset-password?token={$token}&email=" . urlencode($email);
 
-        try {
-            Mail::send([], [], function ($message) use ($email, $resetLink, $user, $frontendUrl) {
-                $message->to($email)
-                    ->subject('Link Verifikasi Lupa Password - Smart Campus Helpdesk')
-                    ->html("
+        // Kirim email di background SETELAH response dikirim ke client
+        // Ini mencegah timeout di frontend saat SMTP lambat/terblokir
+        $userName = $user->name;
+        dispatch(function () use ($email, $resetLink, $userName) {
+            try {
+                Mail::send([], [], function ($message) use ($email, $resetLink, $userName) {
+                    $message->to($email)
+                        ->subject('Link Verifikasi Lupa Password - Smart Campus Helpdesk')
+                        ->html("
 <!DOCTYPE html>
 <html>
 <head>
@@ -94,7 +98,7 @@ class ForgotPasswordController extends Controller
 
         <!-- Card -->
         <div style=\"background-color: #181818; padding: 40px; border-radius: 8px; box-shadow: 0px 8px 24px rgba(0,0,0,0.5);\">
-            <p style=\"margin-top: 0; font-size: 16px; font-weight: 700; color: #ffffff;\">Halo {$user->name},</p>
+            <p style=\"margin-top: 0; font-size: 16px; font-weight: 700; color: #ffffff;\">Halo {$userName},</p>
             <p style=\"color: #b3b3b3; line-height: 1.6; font-size: 16px; margin-bottom: 32px;\">Kami menerima permintaan untuk mereset password akun Anda. Silakan klik tombol di bawah ini untuk memverifikasi email Anda dan membuat password baru:</p>
 
             <div style=\"text-align: center; margin: 40px 0;\">
@@ -117,19 +121,16 @@ class ForgotPasswordController extends Controller
 </body>
 </html>
                     ");
-            });
+                });
+            } catch (\Exception $e) {
+                \Log::error('Gagal mengirim email reset password: ' . $e->getMessage());
+            }
+        })->afterResponse();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Link reset password telah dikirim ke email Anda.',
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Gagal mengirim email reset password: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengirim email. Silakan coba lagi.',
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Link reset password telah dikirim ke email Anda.',
+        ]);
     }
 
     /**

@@ -277,13 +277,15 @@ class AuthController extends Controller
             'created_at' => now(),
         ]);
 
-        $frontendUrl = rtrim(env('FRONTEND_URL', 'http://localhost:3000'), '/');
-
-        try {
-            \Illuminate\Support\Facades\Mail::send([], [], function ($message) use ($email, $otp, $user) {
-                $message->to($email)
-                    ->subject('Kode Verifikasi Ganti Password - Smart Campus Helpdesk')
-                    ->html("
+        // Kirim email di background SETELAH response dikirim ke client
+        // Ini mencegah timeout di frontend saat SMTP lambat/terblokir
+        $userName = $user->name;
+        dispatch(function () use ($email, $otp, $userName) {
+            try {
+                \Illuminate\Support\Facades\Mail::send([], [], function ($message) use ($email, $otp, $userName) {
+                    $message->to($email)
+                        ->subject('Kode Verifikasi Ganti Password - Smart Campus Helpdesk')
+                        ->html("
 <!DOCTYPE html>
 <html>
 <head></head>
@@ -294,7 +296,7 @@ class AuthController extends Controller
       <p style=\"color:#b3b3b3;font-size:14px;margin-top:8px;font-weight:400;\">Universitas Sebelas April (UNSAP)</p>
     </div>
     <div style=\"background-color:#181818;padding:40px;border-radius:8px;box-shadow:0px 8px 24px rgba(0,0,0,0.5);\">
-      <p style=\"margin-top:0;font-size:16px;font-weight:700;color:#ffffff;\">Halo {$user->name},</p>
+      <p style=\"margin-top:0;font-size:16px;font-weight:700;color:#ffffff;\">Halo {$userName},</p>
       <p style=\"color:#b3b3b3;line-height:1.6;font-size:16px;margin-bottom:32px;\">Anda baru saja meminta untuk mengganti password. Gunakan kode verifikasi OTP 6 digit berikut:</p>
       <div style=\"text-align:center;margin:40px 0;\">
         <div style=\"background-color:#1f1f1f;padding:24px 40px;border-radius:12px;display:inline-block;\">
@@ -313,19 +315,16 @@ class AuthController extends Controller
 </body>
 </html>
                     ");
-            });
+                });
+            } catch (\Exception $e) {
+                \Log::error('Gagal mengirim OTP ganti password: ' . $e->getMessage());
+            }
+        })->afterResponse();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Kode OTP telah dikirim ke email Anda.',
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Gagal mengirim OTP ganti password: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengirim email verifikasi.',
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Kode OTP telah dikirim ke email Anda.',
+        ]);
     }
 
     /**
