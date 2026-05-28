@@ -137,11 +137,6 @@ export default function LoginPage() {
                       </FormItem>
                     )}
                   />
-                  <div className="flex justify-end px-2 pt-1">
-                    <Link href="/forgot-password" className="text-[11px] text-[#1ed760] hover:text-[#1fdf64] hover:underline font-medium transition-colors">
-                      Lupa Password?
-                    </Link>
-                  </div>
                 </div>
               </div>
 
