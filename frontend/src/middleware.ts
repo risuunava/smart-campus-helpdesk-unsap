@@ -8,7 +8,7 @@ export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Rute publik yang tidak perlu diproteksi
-  if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname === '/_next' || pathname.startsWith('/api') || pathname.startsWith('/images')) {
+  if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password') || pathname.startsWith('/reset-password') || pathname === '/_next' || pathname.startsWith('/api') || pathname.startsWith('/images')) {
     // Jika sudah login tapi mencoba ke /login, redirect ke dashboard yang sesuai
     if (token && cachedUserStr && (pathname === '/login' || pathname === '/register')) {
       try {

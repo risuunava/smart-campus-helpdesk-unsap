@@ -239,6 +239,161 @@ class AuthController extends Controller
     }
 
     /**
+     * Request OTP untuk ganti password di halaman Pengaturan
+     */
+    public function requestPasswordChangeOtp(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'current_password'      => 'required|string',
+            'password'              => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password saat ini tidak sesuai',
+                'errors'  => ['current_password' => ['Password saat ini tidak sesuai']],
+            ], 422);
+        }
+
+        // Generate OTP 6 digit
+        $otp   = sprintf('%06d', mt_rand(100000, 999999));
+        $email = $user->email;
+
+        \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $email)->delete();
+        \Illuminate\Support\Facades\DB::table('password_reset_tokens')->insert([
+            'email'      => $email,
+            'token'      => Hash::make($otp),
+            'created_at' => now(),
+        ]);
+
+        $frontendUrl = rtrim(env('FRONTEND_URL', 'http://localhost:3000'), '/');
+
+        try {
+            \Illuminate\Support\Facades\Mail::send([], [], function ($message) use ($email, $otp, $user) {
+                $message->to($email)
+                    ->subject('Kode Verifikasi Ganti Password - Smart Campus Helpdesk')
+                    ->html("
+<!DOCTYPE html>
+<html>
+<head></head>
+<body style=\"margin:0;padding:0;background-color:#121212;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:#ffffff;\">
+  <div style=\"max-width:600px;margin:0 auto;padding:40px 20px;background-color:#121212;\">
+    <div style=\"text-align:center;margin-bottom:40px;\">
+      <h2 style=\"color:#ffffff;margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;\">Smart Campus Helpdesk</h2>
+      <p style=\"color:#b3b3b3;font-size:14px;margin-top:8px;font-weight:400;\">Universitas Sebelas April (UNSAP)</p>
+    </div>
+    <div style=\"background-color:#181818;padding:40px;border-radius:8px;box-shadow:0px 8px 24px rgba(0,0,0,0.5);\">
+      <p style=\"margin-top:0;font-size:16px;font-weight:700;color:#ffffff;\">Halo {$user->name},</p>
+      <p style=\"color:#b3b3b3;line-height:1.6;font-size:16px;margin-bottom:32px;\">Anda baru saja meminta untuk mengganti password. Gunakan kode verifikasi OTP 6 digit berikut:</p>
+      <div style=\"text-align:center;margin:40px 0;\">
+        <div style=\"background-color:#1f1f1f;padding:24px 40px;border-radius:12px;display:inline-block;\">
+          <span style=\"color:#1ed760;font-size:36px;font-weight:900;letter-spacing:14px;font-family:'Courier New',Courier,monospace;\">{$otp}</span>
+        </div>
+      </div>
+      <div style=\"border-left:2px solid #f3727f;padding-left:16px;margin-bottom:24px;\">
+        <p style=\"color:#f3727f;font-size:14px;margin:0;font-weight:600;\">Penting: Kode OTP ini hanya berlaku selama 15 menit dan hanya bisa digunakan sekali.</p>
+      </div>
+      <p style=\"color:#7c7c7c;font-size:14px;line-height:1.5;margin-bottom:0;\">Jika Anda tidak mencoba mengganti password, segera amankan akun Anda.</p>
+    </div>
+    <div style=\"margin-top:40px;text-align:center;\">
+      <p style=\"font-size:12px;color:#7c7c7c;margin:0;\">Email ini dikirim secara otomatis. Mohon jangan membalas.</p>
+    </div>
+  </div>
+</body>
+</html>
+                    ");
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Kode OTP telah dikirim ke email Anda.',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Gagal mengirim OTP ganti password: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengirim email verifikasi.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Verifikasi OTP dan simpan password baru
+     */
+    public function verifyPasswordChangeOtp(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'otp'      => 'required|string|size:6',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $record = \Illuminate\Support\Facades\DB::table('password_reset_tokens')
+            ->where('email', $user->email)
+            ->first();
+
+        if (!$record) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Permintaan tidak valid atau OTP sudah kedaluwarsa.',
+            ], 400);
+        }
+
+        // Cek kedaluwarsa 15 menit
+        if (\Carbon\Carbon::parse($record->created_at)->addMinutes(15)->isPast()) {
+            \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode OTP sudah kedaluwarsa. Silakan minta kode baru.',
+            ], 400);
+        }
+
+        if (!Hash::check($request->otp, $record->token)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode OTP salah.',
+            ], 400);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+
+        Notification::send(
+            $user->id,
+            'password_changed',
+            'Password Diperbarui',
+            'Password akun Anda berhasil diperbarui melalui verifikasi email OTP.'
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password berhasil diperbarui.',
+        ]);
+    }
+
+    /**
      * Update avatar user
      */
     public function updateAvatar(Request $request): JsonResponse

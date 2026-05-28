@@ -117,6 +117,25 @@ class ApiClient {
     this.setToken(null);
   }
 
+  async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
+    return this.request("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async resetPassword(data: {
+    email: string;
+    token: string;
+    password: string;
+    password_confirmation: string;
+  }): Promise<{ success: boolean; message: string }> {
+    return this.request("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
   async getUser(): Promise<User> {
     const response = await this.request<{ success: boolean; data: User }>(
       "/auth/user",
@@ -161,6 +180,28 @@ class ApiClient {
   }): Promise<{ success: boolean; message: string }> {
     return this.request("/auth/password", {
       method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async requestPasswordChangeOtp(data: {
+    current_password: string;
+    password: string;
+    password_confirmation: string;
+  }): Promise<{ success: boolean; message: string }> {
+    return this.request("/auth/password/request-otp", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async verifyPasswordChangeOtp(data: {
+    otp: string;
+    password: string;
+    password_confirmation: string;
+  }): Promise<{ success: boolean; message: string }> {
+    return this.request("/auth/password/verify-otp", {
+      method: "POST",
       body: JSON.stringify(data),
     });
   }

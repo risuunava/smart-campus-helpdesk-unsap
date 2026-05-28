@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Lock, Mail, BookOpen, GraduationCap, Camera, Sun, Moon, Monitor, Palette, Shield } from "lucide-react";
+import { User, Lock, Mail, BookOpen, GraduationCap, Camera, Sun, Moon, Monitor, Palette, Shield, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { AvatarCropModal } from "@/components/ui/AvatarCropModal";
@@ -41,6 +41,16 @@ export default function SettingsPage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [cropOpen, setCropOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState("");
+  const [otpMode, setOtpMode] = useState(false);
+  const [otp, setOtp] = useState("");
+  
+  // State untuk show/hide password & error validasi
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmError, setConfirmError] = useState("");
+
   const fileRef = useRef<HTMLInputElement>(null);
 
   if (!user) return null;
@@ -77,16 +87,51 @@ export default function SettingsPage() {
     finally { setSavingProfile(false); }
   };
 
-  const savePassword = async (e: React.FormEvent) => {
+  const requestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordForm.password !== passwordForm.password_confirmation)
-      return toast.error("Konfirmasi password tidak cocok");
+    setPasswordError("");
+    setConfirmError("");
+    
+    if (passwordForm.password !== passwordForm.password_confirmation) {
+      setConfirmError("Konfirmasi password tidak cocok");
+      toast.error("Konfirmasi password tidak cocok");
+      return;
+    }
+    
     setSavingPassword(true);
     try {
-      await api.updatePassword(passwordForm);
-      toast.success("Password diperbarui");
+      await api.requestPasswordChangeOtp({
+        current_password: passwordForm.current_password,
+        password: passwordForm.password,
+        password_confirmation: passwordForm.password_confirmation,
+      });
+      toast.success("Kode OTP telah dikirim ke email Anda!");
+      setOtpMode(true);
+    } catch (err: any) { 
+      const errMsg = err.message || "Gagal mengirim OTP";
+      if (errMsg.toLowerCase().includes("saat ini") || errMsg.toLowerCase().includes("current password")) {
+        setPasswordError("Password saat ini salah");
+      }
+      toast.error(errMsg); 
+    }
+    finally { setSavingPassword(false); }
+  };
+
+  const verifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 6) return toast.error("OTP harus 6 digit");
+    setSavingPassword(true);
+    try {
+      await api.verifyPasswordChangeOtp({
+        otp,
+        password: passwordForm.password,
+        password_confirmation: passwordForm.password_confirmation,
+      });
+      toast.success("Password berhasil diperbarui!");
+      setOtpMode(false);
+      setOtp("");
       setPasswordForm({ current_password: "", password: "", password_confirmation: "" });
-    } catch (err: any) { toast.error(err.message || "Gagal memperbarui"); }
+    } catch (err: any) { toast.error(err.message || "Kode OTP tidak valid"); }
     finally { setSavingPassword(false); }
   };
 
@@ -220,47 +265,125 @@ export default function SettingsPage() {
 
       {/* ── KEAMANAN ── */}
       {tab === "security" && (
-        <form onSubmit={savePassword} className="space-y-5 max-w-md">
-          <p className="text-sm th-text-2 mb-2">Perbarui kata sandi akun Anda.</p>
+        !otpMode ? (
+          <form onSubmit={requestOtp} className="space-y-5 max-w-md">
+            <p className="text-sm th-text-2 mb-2">Perbarui kata sandi akun Anda. Kode OTP akan dikirim ke email untuk konfirmasi.</p>
 
-          <Field label="Password saat ini" required>
-            <Input
-              type="password"
-              value={passwordForm.current_password}
-              onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
-              className="input-focus h-10"
-              required
-            />
-          </Field>
+            <Field label="Password saat ini" required>
+              <div className="relative">
+                <Input
+                  type={showCurrentPassword ? "text" : "password"}
+                  value={passwordForm.current_password}
+                  onChange={(e) => {
+                    setPasswordForm({ ...passwordForm, current_password: e.target.value });
+                    if (passwordError) setPasswordError("");
+                  }}
+                  className={`input-focus h-10 pr-10 ${passwordError ? 'border-red-500 focus-visible:ring-red-500/30' : ''}`}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {passwordError && (
+                <p className="text-red-500 text-xs mt-1 font-medium">{passwordError}</p>
+              )}
+            </Field>
 
-          <Field label="Password baru" required>
-            <Input
-              type="password"
-              value={passwordForm.password}
-              onChange={(e) => setPasswordForm({ ...passwordForm, password: e.target.value })}
-              className="input-focus h-10"
-              required
-              minLength={6}
-            />
-          </Field>
+            <Field label="Password baru" required>
+              <div className="relative">
+                <Input
+                  type={showNewPassword ? "text" : "password"}
+                  value={passwordForm.password}
+                  onChange={(e) => {
+                    setPasswordForm({ ...passwordForm, password: e.target.value });
+                    if (confirmError) setConfirmError("");
+                  }}
+                  className="input-focus h-10 pr-10"
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </Field>
 
-          <Field label="Konfirmasi password baru" required>
-            <Input
-              type="password"
-              value={passwordForm.password_confirmation}
-              onChange={(e) => setPasswordForm({ ...passwordForm, password_confirmation: e.target.value })}
-              className="input-focus h-10"
-              required
-              minLength={6}
-            />
-          </Field>
+            <Field label="Konfirmasi password baru" required>
+              <div className="relative">
+                <Input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={passwordForm.password_confirmation}
+                  onChange={(e) => {
+                    setPasswordForm({ ...passwordForm, password_confirmation: e.target.value });
+                    if (confirmError) setConfirmError("");
+                  }}
+                  className={`input-focus h-10 pr-10 ${confirmError ? 'border-red-500 focus-visible:ring-red-500/30' : ''}`}
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {confirmError && (
+                <p className="text-red-500 text-xs mt-1 font-medium">{confirmError}</p>
+              )}
+            </Field>
 
-          <div className="flex justify-end pt-2">
-            <Button type="submit" disabled={savingPassword} className="btn-gradient h-9 px-6 text-sm">
-              {savingPassword ? "Memperbarui…" : "Perbarui password"}
-            </Button>
-          </div>
-        </form>
+            <div className="flex justify-end pt-2">
+              <Button type="submit" disabled={savingPassword} className="btn-gradient h-9 px-6 text-sm">
+                {savingPassword ? "Memproses…" : "Ganti Password"}
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={verifyOtp} className="space-y-5 max-w-md">
+            <div className="p-4 rounded-lg" style={{ background: 'rgba(30,215,96,0.06)', border: '1px solid rgba(30,215,96,0.2)' }}>
+              <p className="text-sm font-medium text-[#1ed760] mb-1">Cek email Anda!</p>
+              <p className="text-xs th-text-m">Kode OTP 6 digit telah dikirim ke <strong className="th-text">{user.email}</strong>. Berlaku selama 15 menit.</p>
+            </div>
+
+            <Field label="Kode Verifikasi (OTP)" required>
+              <Input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                className="input-focus h-12 text-center text-2xl tracking-[0.6em] font-mono"
+                required
+                placeholder="000000"
+                autoFocus
+              />
+            </Field>
+
+            <div className="flex justify-between items-center pt-2">
+              <button
+                type="button"
+                onClick={() => { setOtpMode(false); setOtp(""); }}
+                className="text-xs th-text-m hover:th-text transition-colors"
+              >
+                ← Kembali
+              </button>
+              <Button type="submit" disabled={savingPassword || otp.length !== 6} className="btn-gradient h-9 px-6 text-sm">
+                {savingPassword ? "Memverifikasi…" : "Verifikasi & Simpan"}
+              </Button>
+            </div>
+          </form>
+        )
       )}
 
       {/* Crop Modal */}

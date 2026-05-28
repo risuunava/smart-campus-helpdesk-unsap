@@ -110,32 +110,39 @@ export default function LoginPage() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <div className="relative group">
-                          <Input
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Kata Sandi"
-                            className="bg-[#2a2a2a]/40 border-white/5 text-white placeholder:text-[#666666] rounded-2xl h-14 px-6 pr-12 focus-visible:ring-1 focus-visible:ring-[#1ed760]/50 transition-all text-sm shadow-inner"
-                            {...field}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-5 top-1/2 -translate-y-1/2 text-[#666666] hover:text-white transition-colors"
-                          >
-                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </button>
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-[10px] text-[#f3727f] ml-4 font-bold" />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-1">
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <div className="relative group">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Kata Sandi"
+                              className="bg-[#2a2a2a]/40 border-white/5 text-white placeholder:text-[#666666] rounded-2xl h-14 px-6 pr-12 focus-visible:ring-1 focus-visible:ring-[#1ed760]/50 transition-all text-sm shadow-inner"
+                              {...field}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-5 top-1/2 -translate-y-1/2 text-[#666666] hover:text-white transition-colors"
+                            >
+                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-[10px] text-[#f3727f] ml-4 font-bold" />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end px-2 pt-1">
+                    <Link href="/forgot-password" className="text-[11px] text-[#1ed760] hover:text-[#1fdf64] hover:underline font-medium transition-colors">
+                      Lupa Password?
+                    </Link>
+                  </div>
+                </div>
               </div>
 
               <div className="flex items-center gap-3 py-1 px-1">
