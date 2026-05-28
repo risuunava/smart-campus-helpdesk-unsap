@@ -1,33 +1,54 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "@/hooks/useAuth";
-import { loginSchema, LoginFormData } from "@/lib/validators";
+import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2, GraduationCap, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { Loader2, ArrowLeft, Mail, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { api } from "@/lib/api";
 
-export default function LoginPage() {
-  const { login, error, isLoading } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
+const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .min(1, "Email wajib diisi")
+    .email("Format email tidak valid"),
+});
 
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+
+export default function ForgotPasswordPage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const form = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
   });
 
-  async function onSubmit(data: LoginFormData) {
+  async function onSubmit(data: ForgotPasswordFormData) {
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+
     try {
-      await login(data);
-    } catch {
-      // Error handled by useAuth
+      const response = await api.forgotPassword(data.email);
+      if (response.success) {
+        setSuccess(response.message || "Link reset password telah dikirim ke email Anda.");
+        form.reset();
+      } else {
+        setError(response.message || "Terjadi kesalahan saat memproses permintaan Anda.");
+      }
+    } catch (err: any) {
+      setError(err.message || "Gagal mengirim link reset password. Silakan coba lagi.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -42,9 +63,8 @@ export default function LoginPage() {
 
       <div className="w-full max-w-[420px] bg-[#121212] rounded-[40px] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.7)] border border-white/5 animate-in fade-in zoom-in-95 duration-700 relative z-10">
         
-        {/* Top Header Section with Integrated Background Image (Gradient Overlay) */}
+        {/* Top Header Section */}
         <div className="p-10 pb-16 relative overflow-hidden">
-          {/* Background Image with Gradient Overlay as per Reference */}
           <div className="absolute inset-0 z-0">
             <Image
               src="/images/banner.png"
@@ -53,108 +73,72 @@ export default function LoginPage() {
               className="object-cover opacity-70 grayscale-[0.5] brightness-[0.4]"
               priority
             />
-            {/* Gradient Overlay inspired by reference image */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#1c1c1c]/30 via-[#121212]/40 to-[#121212]" />
             <div className="absolute inset-0 bg-[#121212]/20 mix-blend-multiply" />
           </div>
 
           <div className="relative z-10">
             <div className="mb-6 flex items-center gap-3">
-              <div className="w-11 h-11 flex items-center justify-center shrink-0">
-                <Image 
-                  src="/images/hd-logo.png" 
-                  alt="UNSAP Logo" 
-                  width={44} 
-                  height={44} 
-                  className="object-contain"
-                />
-              </div>
+              <Link href="/login" className="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
               <div className="leading-tight">
                 <h1 className="font-bold text-white text-sm tracking-wide">UNSAP</h1>
                 <p className="text-[11px] text-white/60">Helpdesk</p>
               </div>
             </div>
 
-            <h1 className="text-[30px] leading-[1.15] font-bold text-white tracking-tight drop-shadow-sm">
-              Selesaikan laporan kampus <br />
-              <span className="text-[#1ed760]">bersama kami!</span>
+            <h1 className="text-[28px] leading-[1.15] font-bold text-white tracking-tight drop-shadow-sm">
+              Lupa <span className="text-[#1ed760]">Kata Sandi?</span>
             </h1>
+            <p className="text-white/60 text-xs mt-2">
+              Masukkan alamat email Anda untuk menerima link verifikasi reset password.
+            </p>
           </div>
         </div>
 
         {/* Overlapping Form Section */}
         <div className="bg-[#181818] rounded-t-[40px] -mt-8 relative z-10 p-10 pt-10 shadow-[0_-15px_35px_rgba(0,0,0,0.4)] border-t border-white/[0.05]">
+          
           {error && (
             <div className="mb-6 p-4 bg-[#f3727f]/10 border border-[#f3727f]/20 rounded-2xl animate-in slide-in-from-top-2">
               <p className="text-[11px] text-[#f3727f] font-bold text-center tracking-wide uppercase">{error}</p>
             </div>
           )}
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-3">
+          {success && (
+            <div className="mb-6 p-5 bg-[#1ed760]/10 border border-[#1ed760]/20 rounded-2xl animate-in slide-in-from-top-2 text-center">
+              <CheckCircle className="h-8 w-8 text-[#1ed760] mx-auto mb-2" />
+              <p className="text-[12px] text-white font-semibold leading-relaxed">{success}</p>
+              <p className="text-[10px] text-[#888888] mt-2">
+                Jangan lupa untuk memeriksa folder Spam jika email tidak masuk ke Kotak Masuk Utama.
+              </p>
+            </div>
+          )}
+
+          {!success && (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input
-                          placeholder="Alamat Email"
-                          className="bg-[#2a2a2a]/40 border-white/5 text-white placeholder:text-[#666666] rounded-2xl h-14 px-6 focus-visible:ring-1 focus-visible:ring-[#1ed760]/50 transition-all text-sm shadow-inner"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage className="text-[10px] text-[#f3727f] ml-4 font-bold" />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
                         <div className="relative group">
                           <Input
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Kata Sandi"
+                            placeholder="Masukkan Email Gmail Anda"
                             className="bg-[#2a2a2a]/40 border-white/5 text-white placeholder:text-[#666666] rounded-2xl h-14 px-6 pr-12 focus-visible:ring-1 focus-visible:ring-[#1ed760]/50 transition-all text-sm shadow-inner"
                             {...field}
                           />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-5 top-1/2 -translate-y-1/2 text-[#666666] hover:text-white transition-colors"
-                          >
-                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </button>
+                          <Mail className="absolute right-5 top-1/2 -translate-y-1/2 text-[#666666] h-4 w-4" />
                         </div>
                       </FormControl>
                       <FormMessage className="text-[10px] text-[#f3727f] ml-4 font-bold" />
                     </FormItem>
                   )}
                 />
-              </div>
 
-              <div className="flex items-center justify-between py-1 px-1">
-                <div className="flex items-center gap-3">
-                  <input 
-                    type="checkbox" 
-                    id="agree" 
-                    className="w-4 h-4 rounded bg-[#2a2a2a] border-none text-[#1ed760] focus:ring-offset-0 focus:ring-[#1ed760]/50 transition-all"
-                  />
-                  <label htmlFor="agree" className="text-[10px] text-[#888888] font-medium leading-relaxed cursor-pointer select-none">
-                    Saya setuju dengan <Link href="#" className="text-white hover:underline font-bold transition-colors">Kebijakan Privasi</Link>
-                  </label>
-                </div>
-                <Link href="/forgot-password" className="text-[10px] text-[#1ed760] font-bold hover:underline transition-colors">
-                  Lupa Password?
-                </Link>
-              </div>
-
-              <div className="pt-2">
                 <button
                   type="submit"
                   disabled={isLoading}
@@ -165,16 +149,16 @@ export default function LoginPage() {
                   {isLoading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (
-                    "MASUK SEKARANG"
+                    "KIRIM LINK VERIFIKASI"
                   )}
                 </button>
-              </div>
-            </form>
-          </Form>
+              </form>
+            </Form>
+          )}
 
           <div className="mt-8 text-center border-t border-white/5 pt-6">
             <p className="text-[10px] text-[#666666] font-medium tracking-wide">
-              Belum punya akun? <Link href="#" className="text-white font-bold hover:underline transition-colors">Hubungi Admin</Link>
+              Kembali ke halaman <Link href="/login" className="text-[#1ed760] font-bold hover:underline transition-colors">Login</Link>
             </p>
           </div>
         </div>
