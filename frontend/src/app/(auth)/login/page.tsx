@@ -145,15 +145,20 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 py-1 px-1">
-                <input 
-                  type="checkbox" 
-                  id="agree" 
-                  className="w-4 h-4 rounded bg-[#2a2a2a] border-none text-[#1ed760] focus:ring-offset-0 focus:ring-[#1ed760]/50 transition-all"
-                />
-                <label htmlFor="agree" className="text-[10px] text-[#888888] font-medium leading-relaxed cursor-pointer select-none">
-                  Saya setuju dengan <Link href="#" className="text-white hover:underline font-bold transition-colors">Kebijakan Privasi</Link>
-                </label>
+              <div className="flex items-center justify-between py-1 px-1">
+                <div className="flex items-center gap-3">
+                  <input 
+                    type="checkbox" 
+                    id="agree" 
+                    className="w-4 h-4 rounded bg-[#2a2a2a] border-none text-[#1ed760] focus:ring-offset-0 focus:ring-[#1ed760]/50 transition-all"
+                  />
+                  <label htmlFor="agree" className="text-[10px] text-[#888888] font-medium leading-relaxed cursor-pointer select-none">
+                    Saya setuju dengan <Link href="#" className="text-white hover:underline font-bold transition-colors">Kebijakan Privasi</Link>
+                  </label>
+                </div>
+                <Link href="/forgot-password" className="text-[10px] text-[#1ed760] font-bold hover:underline transition-colors">
+                  Lupa Password?
+                </Link>
               </div>
 
               <div className="pt-2">

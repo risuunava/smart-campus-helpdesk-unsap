@@ -12,7 +12,8 @@ export default function proxy(request: NextRequest) {
     // Jika sudah login tapi mencoba ke /login, redirect ke dashboard yang sesuai
     if (token && cachedUserStr && (pathname === '/login' || pathname === '/register')) {
       try {
-        const user = JSON.parse(cachedUserStr);
+        const decodedStr = decodeURIComponent(cachedUserStr);
+        const user = JSON.parse(decodedStr);
         if (user.role === 'admin' || user.role === 'master_admin') {
           return NextResponse.redirect(new URL('/admin', request.url));
         } else {
@@ -35,7 +36,8 @@ export default function proxy(request: NextRequest) {
   }
 
   try {
-    const user = JSON.parse(cachedUserStr);
+    const decodedStr = decodeURIComponent(cachedUserStr);
+    const user = JSON.parse(decodedStr);
     
     // Redirect dari root atau /dashboard ke dashboard spesifik role
     if (pathname === '/' || pathname === '/dashboard') {

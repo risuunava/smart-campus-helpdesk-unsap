@@ -192,7 +192,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Update password user
+     * Update password user (Direct - Legacy)
      */
     public function updatePassword(Request $request): JsonResponse
     {

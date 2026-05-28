@@ -14,6 +14,7 @@ import { User, Lock, Mail, BookOpen, GraduationCap, Camera, Sun, Moon, Monitor, 
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { AvatarCropModal } from "@/components/ui/AvatarCropModal";
+import { SuccessDialog } from "@/components/ui/SuccessDialog";
 
 type Tab = "profile" | "appearance" | "security";
 
@@ -53,6 +54,23 @@ export default function SettingsPage() {
 
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Password visibility states
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Success Pop-up states
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [successData, setSuccessData] = useState<{
+    title: string;
+    description: string;
+    type: "profile" | "password" | "avatar";
+  }>({
+    title: "",
+    description: "",
+    type: "profile",
+  });
+
   if (!user) return null;
 
   // ── handlers ──
@@ -69,9 +87,14 @@ export default function SettingsPage() {
     setUploadingAvatar(true);
     try {
       await api.updateAvatar(new File([blob], "avatar.jpg", { type: "image/jpeg" }));
-      toast.success("Foto profil diperbarui");
       setCropOpen(false);
-      setTimeout(() => router.refresh(), 800);
+      setSuccessData({
+        title: "Foto Profil Diperbarui!",
+        description: "Foto profil baru Anda telah berhasil diperbarui.",
+        type: "avatar",
+      });
+      setSuccessOpen(true);
+      router.refresh();
     } catch (err: any) { toast.error(err.message || "Gagal upload"); }
     finally { setUploadingAvatar(false); }
   };
@@ -81,8 +104,13 @@ export default function SettingsPage() {
     setSavingProfile(true);
     try {
       await api.updateProfile(profileForm);
-      toast.success("Profil disimpan");
-      setTimeout(() => router.refresh(), 800);
+      setSuccessData({
+        title: "Profil Berhasil Diubah!",
+        description: "Informasi profil Anda telah berhasil diperbarui.",
+        type: "profile",
+      });
+      setSuccessOpen(true);
+      router.refresh();
     } catch (err: any) { toast.error(err.message || "Gagal menyimpan"); }
     finally { setSavingProfile(false); }
   };
@@ -393,6 +421,15 @@ export default function SettingsPage() {
         onClose={() => setCropOpen(false)}
         onCropComplete={onCrop}
         isLoading={uploadingAvatar}
+      />
+
+      {/* Success Dialog Popup */}
+      <SuccessDialog
+        isOpen={successOpen}
+        onClose={() => setSuccessOpen(false)}
+        title={successData.title}
+        description={successData.description}
+        type={successData.type}
       />
     </div>
   );
