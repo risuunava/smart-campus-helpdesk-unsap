@@ -54,10 +54,6 @@ export default function SettingsPage() {
 
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Password visibility states
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Success Pop-up states
   const [successOpen, setSuccessOpen] = useState(false);
