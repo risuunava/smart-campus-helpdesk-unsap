@@ -90,7 +90,7 @@ class ApiClient {
     } catch (err: any) {
       if (err.name === "AbortError") {
         throw new Error(
-          "Koneksi ke server timeout. Pastikan backend berjalan di http://localhost:8000",
+          `Koneksi ke server timeout. Pastikan backend berjalan di ${API_URL}`,
         );
       }
       throw err;
