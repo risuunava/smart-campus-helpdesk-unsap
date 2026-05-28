@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\FaqController;
 use Illuminate\Http\Request;
@@ -35,6 +36,8 @@ Route::post('/tickets/faq-suggestion', [TicketController::class, 'faqSuggestion'
 // ============================================
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
+Route::post('/auth/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
+Route::post('/auth/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 // ============================================
 // PROTECTED ROUTES (Sanctum Auth)
@@ -51,6 +54,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::put('/auth/profile', [AuthController::class, 'updateProfile']);
     Route::put('/auth/password', [AuthController::class, 'updatePassword']);
+    Route::post('/auth/password/request-otp', [AuthController::class, 'requestPasswordChangeOtp']);
+    Route::post('/auth/password/verify-otp', [AuthController::class, 'verifyPasswordChangeOtp']);
     Route::post('/auth/avatar', [AuthController::class, 'updateAvatar']);
     
     // Tickets - Specific routes BEFORE wildcard {id} routes

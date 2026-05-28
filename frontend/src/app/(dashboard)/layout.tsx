@@ -14,7 +14,8 @@ export default async function DashboardLayout({
 
   if (cachedUserStr) {
     try {
-      initialUser = JSON.parse(cachedUserStr);
+      const decodedStr = decodeURIComponent(cachedUserStr);
+      initialUser = JSON.parse(decodedStr);
     } catch (e) {
       // ignore parse error
     }
